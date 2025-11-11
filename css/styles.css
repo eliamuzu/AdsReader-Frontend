@@ -1,0 +1,217 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 400px;
+  max-width: 90%;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.input {
+  margin-left: 10px;
+  border-radius: 10px;
+  border: none;
+  width: 85%;
+  height: 50%;
+}
+.input:focus {
+  outline: none;
+}
+
+.inputForm:focus-within {
+  border: 1.5px solid #2d79f3;
+}
+.inputForm {
+  border: 1px solid #ecedec;
+  border-radius: 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  transition: 0.2s ease-in-out;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.flex-row > div > label {
+  font-size: 14px;
+  color: black;
+  font-weight: 400;
+}
+.span {
+  font-size: 14px;
+  margin-left: 5px;
+  color: #2d79f3;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.button-submit {
+  margin: 20px 0 10px 0;
+  background-color: #151717;
+  border: none;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  height: 50px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.button-submit:hover {
+  background-color: #252727;
+}
+
+button {
+  width: 100%;
+  background: #01080f;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+p {
+  text-align: center;
+  margin-top: 10px;
+  color: black;
+  font-size: 14px;
+}
+label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 10px 0 5px;
+  color: #333;
+}
+
+.inputForm {
+  display: flex;
+  align-items: center;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 3px 7px;
+  margin-bottom: 15px;
+  transition: border-color 0.3s ease;
+}
+
+.inputForm:focus-within {
+  border-color: #0072ff;
+  background: #fff;
+}
+
+.inputForm svg {
+  flex-shrink: 0;
+  color: #000;
+  margin-right: 10px;
+}
+
+.input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* ==== BUTTON ==== */
+/* .button-submit {
+  background: #0072ff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button-submit:hover {
+  background: #005fd1;
+} */
+
+
+
+/* ==== LINK ==== */
+p {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+p a {
+  color: #0072ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 480px) {
+  .container {
+    width: 90%;
+    padding: 2rem 1.5rem;
+  }
+}
+.messageDiv {
+  background-color: #fffdfd;
+  color: #111010;
+  border: 1px solid #fffdfd;
+  padding: 10px;
+  font-size: 1rem;
+  opacity: 0;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  animation: fadeout 7s forwards;
+}
