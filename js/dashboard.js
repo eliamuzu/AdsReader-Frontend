@@ -331,3 +331,86 @@ updateCalendars();
         console.warn('Sidebar active link script error:', err);
     }
 })();
+
+// Dropdown menu toggle functionality
+(() => {
+    try {
+        const dropdown = document.querySelector('.dropdown');
+        const dropdownBtn = document.querySelector('.dropdown-btn');
+        
+        if (!dropdown || !dropdownBtn) return;
+
+        const storageKey = 'dashboardDropdownSelected';
+
+        // Toggle dropdown on button click
+        dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+
+        // Prepare links
+        const dropdownLinks = document.querySelectorAll('.dropdown-content a');
+
+        // Helper to ensure a label span exists and show the provided text
+        function setButtonLabel(text) {
+            let labelSpan = dropdownBtn.querySelector('.dropdown-label');
+            if (!labelSpan) {
+                labelSpan = document.createElement('span');
+                labelSpan.className = 'dropdown-label';
+
+                // remove existing raw text nodes (e.g., the word "Filter") to avoid duplication
+                Array.from(dropdownBtn.childNodes).forEach(n => {
+                    if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+                        n.textContent = '';
+                    }
+                });
+
+                // insert before the icon if present, otherwise append
+                const icon = dropdownBtn.querySelector('.material-symbols-outlined');
+                if (icon) dropdownBtn.insertBefore(labelSpan, icon);
+                else dropdownBtn.appendChild(labelSpan);
+            }
+            labelSpan.textContent = text;
+        }
+
+        // Initialize from localStorage if available
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+            setButtonLabel(stored);
+            dropdown.dataset.selected = stored;
+            dropdownLinks.forEach(l => {
+                if (l.textContent.trim() === stored) l.classList.add('selected');
+                else l.classList.remove('selected');
+            });
+        }
+
+        // Click handlers for links: update label, mark selected, persist
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const label = link.textContent.trim();
+
+                setButtonLabel(label);
+
+                // mark selected visually in the menu
+                dropdownLinks.forEach(l => l.classList.remove('selected'));
+                link.classList.add('selected');
+
+                // persist selection
+                try { localStorage.setItem(storageKey, label); } catch (err) { /* ignore if storage not available */ }
+
+                dropdown.dataset.selected = label;
+                dropdown.classList.remove('active');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    } catch (err) {
+        console.warn('Dropdown menu script error:', err);
+    }
+})();
