@@ -1,65 +1,71 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import {getAuth,onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-import {getFirestore, getDoc, doc} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyDyiajp4XCJ47Qnn2nEIs2me0n_yXjY-7w",
-  authDomain: "signup-page-52cd3.firebaseapp.com",
-  projectId: "signup-page-52cd3",
-  storageBucket: "signup-page-52cd3.firebasestorage.app",
-  messagingSenderId: "1004059042004",
-  appId: "1:1004059042004:web:3a0b38ce3d69bccb781b41"
-};
+// Delete code below to disable Firebase authentication and user data fetching
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+// import {getAuth,onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+// import {getFirestore, getDoc, doc} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-const auth = getAuth();
-const db = getFirestore();
 
-onAuthStateChanged(auth, (user) => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    if (loggedInUserId) {
-        const docRef = doc(db, "Users", loggedInUserId);
-        getDoc(docRef)
-            .then((docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('loggedUserFullname').innerText = userData.fullname;
-                    document.getElementById('loggedUserEmail').innerText = userData.email;
-                } else {
-                    console.log("No document found matching id");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document", error);
-            });
-    }
-    else{
-        console.log('No UserId in localStorage, signing out');
-        signOut(auth).then(() => {
-            console.log('User signed out');
-        }).catch((error) => {
-            console.log('Error signing out', error);
-        });
-    }
-});
-// Handle logout
-const logoutButton = document.getElementById('logout');
-if (logoutButton) {
-    console.log('Attaching logout handler');
-    logoutButton.addEventListener('click', (e) => {
-        console.log('Logout clicked, signing out...');
-        localStorage.removeItem('loggedInUserId');
-        signOut(auth).then(() => {
-            console.log('User signed out successfully');
-            window.location.href = 'index.html';
-        }).catch((error) => {
-            console.error('Error signing out:', error);
-        });
-    });
-} else {
-    console.error('Logout button not found!');
-}
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDyiajp4XCJ47Qnn2nEIs2me0n_yXjY-7w",
+//   authDomain: "signup-page-52cd3.firebaseapp.com",
+//   projectId: "signup-page-52cd3",
+//   storageBucket: "signup-page-52cd3.firebasestorage.app",
+//   messagingSenderId: "1004059042004",
+//   appId: "1:1004059042004:web:3a0b38ce3d69bccb781b41"
+// };
+
+
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+
+// const auth = getAuth();
+// const db = getFirestore();
+
+// onAuthStateChanged(auth, (user) => {
+//     const loggedInUserId = localStorage.getItem('loggedInUserId');
+//     if (loggedInUserId) {
+//         const docRef = doc(db, "Users", loggedInUserId);
+//         getDoc(docRef)
+//             .then((docSnap) => {
+//                 if (docSnap.exists()) {
+//                     const userData = docSnap.data();
+//                     document.getElementById('loggedUserFullname').innerText = userData.fullname;
+//                     document.getElementById('loggedUserEmail').innerText = userData.email;
+//                 } else {
+//                     console.log("No document found matching id");
+//                 }
+//             })
+//             .catch((error) => {
+//                 console.log("Error getting document", error);
+//             });
+//     }
+//     else{
+//         console.log('No UserId in localStorage, signing out');
+//         signOut(auth).then(() => {
+//             console.log('User signed out');
+//         }).catch((error) => {
+//             console.log('Error signing out', error);
+//         });
+//     }
+// });
+// // Handle logout
+// const logoutButton = document.getElementById('logout');
+// if (logoutButton) {
+//     console.log('Attaching logout handler');
+//     logoutButton.addEventListener('click', (e) => {
+//         console.log('Logout clicked, signing out...');
+//         localStorage.removeItem('loggedInUserId');
+//         signOut(auth).then(() => {
+//             console.log('User signed out successfully');
+//             window.location.href = 'index.html';
+//         }).catch((error) => {
+//             console.error('Error signing out:', error);
+//         });
+//     });
+// } else {
+//     console.error('Logout button not found!');
+// }
 
 const datepicker = document.querySelector('.datepicker');
 const rangeInput = datepicker.querySelector('input');
