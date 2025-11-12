@@ -1,4 +1,4 @@
-// area-chart
+// home-area-chart-will change it later
 var options = {
   series: [{
   name: 'series1',
@@ -31,7 +31,7 @@ tooltip: {
 var chart = new ApexCharts(document.querySelector("#area"), options);
 chart.render();
 
-// line-chart
+// home-line-chart
 var options = {
           series: [{
             name: "Desktops",
@@ -69,7 +69,7 @@ var options = {
         chart.render();
 
 
-        // Reach-line-chart
+        // home-Reach-line-chart
         var options = {
           series: [{
             name: "Desktops",
@@ -108,7 +108,7 @@ var options = {
 
         
 
-        // bar-chart
+        // home-bar-chart
         var options = {
           series: [{
           data: [400, 430, 448, 470, 540, 580, 690, 1100, 1200, 1380, 1480, 1550]
@@ -135,3 +135,6 @@ var options = {
 
         var chart = new ApexCharts(document.querySelector("#bar"), options);
         chart.render();
+
+
+        
