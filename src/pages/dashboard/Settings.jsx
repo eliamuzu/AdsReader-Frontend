@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import DateRangePicker from '../../components/DateRangePicker'
-import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Settings() {
@@ -124,13 +122,6 @@ export default function Settings() {
       >
         <span className="material-symbols-outlined text-2xl">menu</span>
       </button>
-        <Dropdown
-          label="Pages"
-          options={pageOptions}
-          onSelect={handlePageSelect}
-          selectedValue={selectedPage}
-        />
-        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
       </div>
 
       {/* --- MAIN CONTENT AREA --- */}

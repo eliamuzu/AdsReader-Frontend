@@ -1,36 +1,10 @@
 import { useState } from 'react'
-import DateRangePicker from '../../components/DateRangePicker'
-import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Profile() {
    const { toggleSidebar } = useSidebar()
-  const [selectedPage, setSelectedPage] = useState('All')
+  
 
-  const pageOptions = [
-    'All',
-    'Bel-Ice',
-    'BelCola',
-    'Bel-Aqua',
-    'Bel-Beverages',
-    'BelPak',
-    'Bel7Star',
-    'Blowpak',
-    'Cricket',
-    'Prime Insurance',
-    'Moov',
-    'Novo',
-    'Holy Insecticide',
-  ]
-
-  const handleDateRangeChange = (range) => {
-    console.log('Date range changed:', range)
-  }
-
-  const handlePageSelect = (page) => {
-    setSelectedPage(page)
-    console.log('Page selected:', page)
-  }
 
   return (
     <div>
@@ -42,13 +16,6 @@ export default function Profile() {
       >
         <span className="material-symbols-outlined text-2xl">menu</span>
       </button>
-        <Dropdown
-          label="Pages"
-          options={pageOptions}
-          onSelect={handlePageSelect}
-          selectedValue={selectedPage}
-        />
-        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
       </div>
 
       <div className="p-5">
