@@ -109,11 +109,17 @@ export default function Home() {
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
             <div>
               <h2 className="text-xl font-semibold mb-4">Top Performing Content</h2>
+              <div className="mt-4">
+                <ApexChart options={chartOptions} type="area" height={300} />
+              </div>
             </div>
           </div>
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
             <div>
               <h2 className="text-xl font-semibold mb-4">Summary</h2>
+              <div className="mt-4">
+                <ApexChart options={chartOptions} type="area" height={300} />
+              </div>
             </div>
           </div>
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">

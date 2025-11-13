@@ -84,17 +84,17 @@ export default function Sidebar({ onStateChange, onToggle }) {
           </div>
 
           {menuItems.map((item) => (
-            <li key={item.path}>
+            <li key={item.path} className='mb-2'>
               <Link
                 to={item.path}
                 className={`flex items-center gap-0 font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
                   isClosed && !isMobile
-                    ? 'justify-center px-1.5 gap-0'
+                    ? 'justify-center px-1.5 gap-10'
                     : 'gap-[30px]'
                 } ${
                   isActive(item.path)
                     ? 'bg-white text-[#161a2d]'
-                    : 'text-white hover:bg-white hover:text-[#161a2d]'
+                    : 'text-white hover:bg-white hover:top-[2px] hover:text-[#161a2d]'
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">
@@ -115,7 +115,7 @@ export default function Sidebar({ onStateChange, onToggle }) {
           </div>
 
           {accountItems.map((item) => (
-            <li key={item.path}>
+            <li key={item.path} className='mb-2'>
               <Link
                 to={item.path}
                 className={`flex items-center gap-0 font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
