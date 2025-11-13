@@ -139,11 +139,11 @@ export default function Settings() {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-2xl font-semibold mb-4">Settings</h2>
 
-            <h3 className="text-xl font-semibold mb-3 border-t pt-4">👤 Manage Client Access</h3>
+            <h3 className="text-xl font-semibold mb-3 border-t pt-4"> Manage Client Access</h3>
             
             {/* --- ADD NEW CLIENT FORM --- */}
             <div className='p-4 border rounded-lg mb-6 bg-gray-50'>
-              <h4 className='text-lg font-medium mb-3'>Add New Client Rule</h4>
+              <h4 className='text-lg font-medium mb-3'>Add New Client</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 items-end">
                 
                 {/* Client Email Input */}
