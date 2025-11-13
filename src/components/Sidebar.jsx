@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import logoImage from '../../Assets/images/Picture1.png'
+import { useSidebar } from '../contexts/SidebarContext'
 
-export default function Sidebar({ onStateChange }) {
-  const [isClosed, setIsClosed] = useState(false)
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+export default function Sidebar({ onStateChange, onToggle }) {
+  const { sidebarClosed: isClosed, setSidebarClosed, isMobile, setIsMobile } = useSidebar()
   const location = useLocation()
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -21,16 +21,16 @@ export default function Sidebar({ onStateChange }) {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
       if (mobile) {
-        setIsClosed(true)
+        setSidebarClosed(true)
       } else {
-        setIsClosed(false)
+        setSidebarClosed(false)
       }
     }
 
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [setIsMobile, setSidebarClosed])
 
   const handleLogout = () => {
     logout()
@@ -52,15 +52,6 @@ export default function Sidebar({ onStateChange }) {
 
   return (
     <>
-      <button
-        onClick={() => setIsClosed(!isClosed)}
-        className={`fixed top-4 left-4 z-[1000] bg-transparent text-black border-none rounded p-2 cursor-pointer ${
-          isMobile ? 'block' : 'hidden'
-        }`}
-      >
-        <span className="material-symbols-outlined">menu</span>
-      </button>
-
       <aside
         className={`fixed top-0 left-0 h-screen w-[260px] bg-sidebar p-6 shadow-lg transition-all duration-300 z-[100] flex flex-col overflow-x-hidden ${
           isMobile
@@ -83,25 +74,27 @@ export default function Sidebar({ onStateChange }) {
         </div>
 
         <ul className="list-none mt-5 h-[80%] overflow-y-auto scrollbar-none">
-          <h4 className="text-white font-medium whitespace-nowrap my-2.5 relative">
-            <span className={isClosed && !isMobile ? 'opacity-0' : 'opacity-100'}>
+          <div className="text-white font-medium whitespace-nowrap my-2.5 pb-2.5 flex items-center gap-2">
+            <span className={`transition-opacity duration-300 ${isClosed && !isMobile ? 'opacity-0 w-0' : 'opacity-100 flex-1'}`}>
               Main Menu
             </span>
-            <div className="absolute left-0 top-1/2 w-full h-px bg-white -translate-y-1/2 origin-right transition-transform" />
-          </h4>
+            <div className={`flex-shrink-0 h-px bg-white transition-all duration-300 ${
+              isClosed && !isMobile ? 'w-0' : 'flex-1'
+            }`} />
+          </div>
 
           {menuItems.map((item) => (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-0 text-white font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
+                className={`flex items-center gap-0 font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
                   isClosed && !isMobile
                     ? 'justify-center px-1.5 gap-0'
                     : 'gap-[30px]'
                 } ${
                   isActive(item.path)
-                    ? 'bg-white text-[#161a2d] rounded'
-                    : 'hover:bg-white hover:text-[#161a2d]'
+                    ? 'bg-white text-[#161a2d]'
+                    : 'text-white hover:bg-white hover:text-[#161a2d]'
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">
@@ -112,25 +105,27 @@ export default function Sidebar({ onStateChange }) {
             </li>
           ))}
 
-          <h4 className="text-white font-medium whitespace-nowrap my-2.5 relative mt-6">
-            <span className={isClosed && !isMobile ? 'opacity-0' : 'opacity-100'}>
+          <div className="text-white font-medium whitespace-nowrap my-2.5 pb-2.5 flex items-center gap-2 mt-6">
+            <span className={`transition-opacity duration-300 ${isClosed && !isMobile ? 'opacity-0 w-0' : 'opacity-100 flex-1'}`}>
               Account
             </span>
-            <div className="absolute left-0 top-1/2 w-full h-px bg-white -translate-y-1/2 origin-right transition-transform" />
-          </h4>
+            <div className={`flex-shrink-0 h-px bg-white transition-all duration-300 ${
+              isClosed && !isMobile ? 'w-0' : 'flex-1'
+            }`} />
+          </div>
 
           {accountItems.map((item) => (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-0 text-white font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
+                className={`flex items-center gap-0 font-medium whitespace-nowrap py-4 px-2.5 no-underline transition-all rounded ${
                   isClosed && !isMobile
                     ? 'justify-center px-1.5 gap-0'
                     : 'gap-[30px]'
                 } ${
                   isActive(item.path)
-                    ? 'bg-white text-[#161a2d] rounded'
-                    : 'hover:bg-white hover:text-[#161a2d]'
+                    ? 'bg-white text-[#161a2d]'
+                    : 'text-white hover:bg-white hover:text-[#161a2d]'
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">
@@ -160,7 +155,7 @@ export default function Sidebar({ onStateChange }) {
       {isMobile && !isClosed && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-[90]"
-          onClick={() => setIsClosed(true)}
+          onClick={() => setSidebarClosed(true)}
         />
       )}
     </>

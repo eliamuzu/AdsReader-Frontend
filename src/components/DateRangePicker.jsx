@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 export default function DateRangePicker({ onDateRangeChange }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,12 +12,17 @@ export default function DateRangePicker({ onDateRangeChange }) {
     return date
   })
   const pickerRef = useRef(null)
+  const [popupPos, setPopupPos] = useState(null)
+  const popupRef = useRef(null)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
+      // If click is inside the input wrapper, ignore
+      if (pickerRef.current && pickerRef.current.contains(event.target)) return
+      // If click is inside the popup (portal), ignore
+      if (popupRef.current && popupRef.current.contains(event.target)) return
+      // Otherwise close
+      setIsOpen(false)
     }
 
     if (isOpen) {
@@ -26,6 +32,36 @@ export default function DateRangePicker({ onDateRangeChange }) {
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPopupPos(null)
+      return
+    }
+
+    const el = pickerRef.current
+    if (!el) return
+
+    const rect = el.getBoundingClientRect()
+    const estimatedHeight = 360 // estimate popup height for placement
+    const margin = 8
+    let top = rect.bottom + margin
+    // if not enough space below, open above
+    if (window.innerHeight - rect.bottom < estimatedHeight + margin) {
+      top = rect.top - estimatedHeight - margin
+    }
+
+    // prefer shifting left a bit so popup is centered-ish and not flush to input's left
+    const preferredWidth = Math.max(rect.width, 460)
+    let left = rect.left - 20
+    // ensure the popup stays within viewport horizontally
+    if (left + preferredWidth > window.innerWidth - margin) {
+      left = window.innerWidth - preferredWidth - margin
+    }
+    if (left < margin) left = margin
+
+    setPopupPos({ left, top, width: preferredWidth })
   }, [isOpen])
 
   const formatDate = (date) => {
@@ -67,7 +103,6 @@ export default function DateRangePicker({ onDateRangeChange }) {
   const handleCancel = () => {
     setStartDate(null)
     setEndDate(null)
-    setIsOpen(false)
   }
 
   const renderCalendar = (year, month, isLeft = true) => {
@@ -135,7 +170,7 @@ export default function DateRangePicker({ onDateRangeChange }) {
           )}
         </div>
 
-        <div className="grid grid-cols-7 gap-0 mt-2 w-[220px] mb-2 font-semibold">
+  <div className="grid grid-cols-7 gap-0 mt-2 w-full mb-2 font-semibold">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <span key={day} className="text-center">
               {day}
@@ -143,7 +178,7 @@ export default function DateRangePicker({ onDateRangeChange }) {
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-0 w-[220px]">
+  <div className="grid grid-cols-7 gap-0 w-full">
           {dates.map((date, idx) => {
             const isDisabled = date.getMonth() !== month
             const dateStr = formatDate(date)
@@ -191,7 +226,12 @@ export default function DateRangePicker({ onDateRangeChange }) {
     : ''
 
   return (
-    <div className="relative rounded z-[1] max-w-[240px] border-2 border-white shadow-md" ref={pickerRef}>
+    <div
+      className={`relative rounded z-[1] border-2 border-white shadow-md ${
+        isOpen ? 'max-w-none' : 'max-w-[240px]'
+      }`}
+      ref={pickerRef}
+    >
       <input
         type="text"
         placeholder="Select Date"
@@ -200,31 +240,32 @@ export default function DateRangePicker({ onDateRangeChange }) {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full rounded border-none outline-none py-2 pr-8 pl-4 text-sm cursor-pointer"
       />
-      {isOpen && (
-        <div className="absolute top-[110%] right-0.5 mt-2 z-[9999] overflow-hidden p-4 rounded shadow-md bg-white user-select-none text-center text-sm grid grid-cols-2 gap-0.5">
-          {renderCalendar(leftDate.getFullYear(), leftDate.getMonth(), true)}
-          {renderCalendar(rightDate.getFullYear(), rightDate.getMonth(), false)}
-          <div className="col-span-2 flex items-center gap-2 mt-2">
-            <span className="text-sm">
-              {startDate && endDate
-                ? `${formatForDisplay(startDate)} - ${formatForDisplay(endDate)}`
-                : 'No date selected'}
-            </span>
-            <button
-              onClick={handleCancel}
-              className="ml-auto bg-primary/20 py-1 px-2 rounded text-sm"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleApply}
-              className="bg-primary text-white py-1 px-2 rounded text-sm"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
-      )}
+      {isOpen && popupPos
+        ? createPortal(
+            <div ref={popupRef}
+                  style={{ position: 'fixed', left: popupPos.left, top: popupPos.top, width: popupPos.width, zIndex: 9999 }}
+                >
+              <div className="overflow-hidden p-4 rounded shadow-md bg-white user-select-none text-center text-sm grid grid-cols-2 gap-0.5">
+                {renderCalendar(leftDate.getFullYear(), leftDate.getMonth(), true)}
+                {renderCalendar(rightDate.getFullYear(), rightDate.getMonth(), false)}
+                <div className="col-span-2 flex items-center gap-2 mt-2">
+                  <span className="text-sm">
+                    {startDate && endDate
+                      ? `${formatForDisplay(startDate)} - ${formatForDisplay(endDate)}`
+                      : 'No date selected'}
+                  </span>
+                  <button onClick={handleCancel} className="ml-auto bg-primary/20 py-1 px-2 rounded text-sm">
+                    Cancel
+                  </button>
+                  <button onClick={handleApply} className="bg-primary text-white py-1 px-2 rounded text-sm">
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

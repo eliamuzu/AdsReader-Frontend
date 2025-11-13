@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { SidebarProvider } from './contexts/SidebarContext'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 import ForgotPassword from './pages/auth/ForgotPassword'
@@ -29,7 +30,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
       
-      <Route path="/" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+      <Route path="/" element={<PrivateRoute><SidebarProvider><DashboardLayout /></SidebarProvider></PrivateRoute>}>
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
         <Route path="overview" element={<Overview />} />

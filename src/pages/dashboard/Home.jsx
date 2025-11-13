@@ -2,8 +2,11 @@ import { useEffect } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Home() {
+  const { toggleSidebar } = useSidebar()
+
   useEffect(() => {
     // Load ionicons
     const script = document.createElement('script')
@@ -48,7 +51,14 @@ export default function Home() {
 
   return (
     <div>
-      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-end items-center px-4 shadow-md z-[2000] transition-all duration-300 max-md:left-0 max-md:w-full">
+      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-between items-center px-4 shadow-md z-[2000] transition-all duration-300 md:justify-end max-md:left-0 max-md:w-full">
+        <button
+          onClick={toggleSidebar}
+          className="bg-transparent border-none p-2 rounded text-gray-800 hover:bg-gray-100 cursor-pointer md:hidden"
+          aria-label="Toggle sidebar"
+        >
+          <span className="material-symbols-outlined text-2xl">menu</span>
+        </button>
         <DateRangePicker onDateRangeChange={handleDateRangeChange} />
       </div>
 
