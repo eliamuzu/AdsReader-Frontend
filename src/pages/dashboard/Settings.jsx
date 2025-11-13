@@ -138,7 +138,6 @@ export default function Settings() {
         <div className="mt-4">
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-2xl font-semibold mb-4">Settings</h2>
-            <p className="text-gray-600 mb-6">Use this section to manage client credentials and access permissions.</p>
 
             <h3 className="text-xl font-semibold mb-3 border-t pt-4">👤 Manage Client Access</h3>
             
