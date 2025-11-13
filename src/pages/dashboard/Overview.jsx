@@ -1,7 +1,27 @@
 import { useState } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
+import Dropdown from '../../components/Dropdown'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Overview() {
+  const { toggleSidebar } = useSidebar()
+  const [selectedFilter, setSelectedFilter] = useState('All')
+  const filterOptions = [
+    'All',
+    'Bel-Ice',
+    'BelCola',
+    'Bel-Aqua',
+    'Bel-Beverages',
+    'BelPak',
+    'Bel7Star',
+    'Blowpak',
+    'Cricket',
+    'Prime Insurance',
+    'Moov',
+    'Novo',
+    'Holy Insecticide',
+  ]
+
   const [tableData, setTableData] = useState([
     // Sample data - replace with API call
     { month: 'January', reach: 1000, engagement: 500, spend: 2000, views: 5000 },
@@ -13,6 +33,12 @@ export default function Overview() {
     // TODO: Fetch table data for the selected date range
   }
 
+  const handleFilterSelect = (filter) => {
+    setSelectedFilter(filter)
+    console.log('Filter selected:', filter)
+    // TODO: Fetch table data filtered by the selected filter
+  }
+
   const handleDownload = () => {
     // TODO: Implement download functionality
     console.log('Download clicked')
@@ -20,7 +46,23 @@ export default function Overview() {
 
   return (
     <div>
-      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-end items-center px-4 shadow-md z-[2000] transition-all duration-300 max-md:left-0 max-md:w-full">
+      {/* Updated Header Bar */}
+      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-between items-center gap-2 px-4 shadow-md z-[2000] transition-all duration-300 max-md:left-0 max-md:w-full">
+        <button
+        onClick={toggleSidebar}
+        className="bg-transparent border-none p-2 rounded text-gray-800 hover:bg-gray-100 cursor-pointer md:hidden"
+        aria-label="Toggle sidebar"
+      >
+        <span className="material-symbols-outlined text-2xl">menu</span>
+      </button>
+        
+        {/* ADDED DROPDOWN COMPONENT HERE */}
+        <Dropdown
+          label="Pages"
+          options={filterOptions}
+          onSelect={handleFilterSelect}
+          selectedValue={selectedFilter}
+        />
         <DateRangePicker onDateRangeChange={handleDateRangeChange} />
       </div>
 
@@ -48,6 +90,9 @@ export default function Overview() {
                 </tr>
               </thead>
               <tbody>
+                {/* NOTE: You might want to filter tableData here based on selectedFilter 
+                  if the filtering logic is handled purely client-side without an API call.
+                */}
                 {tableData.map((row, idx) => (
                   <tr key={idx}>
                     <td className="p-3 border border-gray-300">{row.month}</td>
@@ -73,4 +118,3 @@ export default function Overview() {
     </div>
   )
 }
-

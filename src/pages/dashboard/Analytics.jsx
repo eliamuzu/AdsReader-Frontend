@@ -3,8 +3,10 @@ import DateRangePicker from '../../components/DateRangePicker'
 import Dropdown from '../../components/Dropdown'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Analytics() {
+   const { toggleSidebar } = useSidebar()
   const [selectedFilter, setSelectedFilter] = useState('All')
 
   useEffect(() => {
@@ -48,11 +50,11 @@ export default function Analytics() {
     series: [
       {
         name: 'series1',
-        data: [31, 40, 28, 51, 42, 109, 100],
+        data: [31, 40, 28, 51, 42, 109, 100, 200],
       },
       {
         name: 'series2',
-        data: [11, 32, 45, 32, 34, 52, 41],
+        data: [11, 32, 45, 32, 34, 52, 41, 150],
       },
     ],
     xaxis: {
@@ -65,13 +67,21 @@ export default function Analytics() {
         '2018-09-19T04:30:00.000Z',
         '2018-09-19T05:30:00.000Z',
         '2018-09-19T06:30:00.000Z',
+        '2018-09-19T07:30:00.000Z',
       ],
     },
   }
 
   return (
     <div>
-      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-end items-center gap-2 px-4 shadow-md z-[2000] transition-all duration-300 max-md:left-0 max-md:w-full">
+      <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex justify-between items-center gap-2 px-4 shadow-md z-[2000] transition-all duration-300 max-md:left-0 max-md:w-full">
+       <button
+        onClick={toggleSidebar}
+        className="bg-transparent border-none p-2 rounded text-gray-800 hover:bg-gray-100 cursor-pointer md:hidden"
+        aria-label="Toggle sidebar"
+      >
+        <span className="material-symbols-outlined text-2xl">menu</span>
+      </button>
         <Dropdown
           label="Pages"
           options={filterOptions}
@@ -82,14 +92,16 @@ export default function Analytics() {
       </div>
 
       <div className="p-2.5 mr-5">
-        <div className="grid grid-cols-2 gap-2.5 p-2.5 mr-5">
+        {/* MODIFICATION 1: Metric Cards - Changed md:grid-cols-1 to grid-cols-2 lg:grid-cols-4 and removed the extra md:grid-cols-1 you had */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
           <MetricCard title="Total Views" value="1,504" icon="eye-outline" />
           <MetricCard title="Total Reach" value="284" icon="globe-outline" />
           <MetricCard title="Total Impressions" value="284" icon="megaphone-outline" />
           <MetricCard title="Total Spend" value="$7,842" icon="cash-outline" />
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
+        {/* MODIFICATION 2: Chart Container - Changed grid-cols-2 to grid-cols-1 md:grid-cols-2 */}
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
             <div>
               <h2 className="text-xl font-semibold mb-4">Top Performing Content</h2>
@@ -141,4 +153,3 @@ export default function Analytics() {
     </div>
   )
 }
-
