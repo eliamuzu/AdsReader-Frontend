@@ -8,7 +8,8 @@ import { get_pages,fetchPage } from '../../services/pages'
 
 export default function Home() {
   const { toggleSidebar } = useSidebar()
-  const [selectedFilter, setSelectedFilter] = useState('All') 
+  const [filterOptions, setFilterOptions] = useState([])
+  const [selectedFilter, setSelectedFilter] = useState('All') // State for the filter
 
 
   useEffect(() => {
