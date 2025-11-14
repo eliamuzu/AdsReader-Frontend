@@ -92,7 +92,7 @@ export default function Analytics() {
       </div>
 
       <div className="p-2.5 mr-5">
-        {/* MODIFICATION 1: Metric Cards - Changed md:grid-cols-1 to grid-cols-2 lg:grid-cols-4 and removed the extra md:grid-cols-1 you had */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
           <MetricCard title="Total Views" value="1,504" icon="eye-outline" />
           <MetricCard title="Total Reach" value="284" icon="globe-outline" />
@@ -100,7 +100,7 @@ export default function Analytics() {
           <MetricCard title="Total Spend" value="$7,842" icon="cash-outline" />
         </div>
 
-        {/* MODIFICATION 2: Chart Container - Changed grid-cols-2 to grid-cols-1 md:grid-cols-2 */}
+        
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
             <div>
@@ -109,7 +109,7 @@ export default function Analytics() {
                 <ApexChart
                   options={{ ...chartOptions, chart: { type: 'bar' } }}
                   type="bar"
-                  height={300}
+                  height={450}
                 />
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function Analytics() {
                 <ApexChart
                   options={{ ...chartOptions, chart: { type: 'line' } }}
                   type="line"
-                  height={300}
+                  height={450}
                 />
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function Analytics() {
               <h2 className="text-xl font-semibold mb-4">Chart</h2>
               <div className="mt-4">
                 <div id="area">
-                  <ApexChart options={chartOptions} type="area" height={300} />
+                  <ApexChart options={chartOptions} type="area" height={450} />
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function Analytics() {
                 <ApexChart
                   options={{ ...chartOptions, chart: { type: 'line' } }}
                   type="line"
-                  height={300}
+                  height={450}
                 />
               </div>
             </div>

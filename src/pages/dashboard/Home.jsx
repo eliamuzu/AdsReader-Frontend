@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react' // Import useState
+import { useState, useEffect } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
-import Dropdown from '../../components/Dropdown' // Import Dropdown
+import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 
 export default function Home() {
   const { toggleSidebar } = useSidebar()
-  const [selectedFilter, setSelectedFilter] = useState('All') // State for the filter
+  const [selectedFilter, setSelectedFilter] = useState('All') 
 
   const filterOptions = [
     'All',
@@ -75,7 +75,6 @@ export default function Home() {
 
   return (
     <div>
-    {/* Header bar */}
     <div className="fixed top-0 left-[260px] w-[calc(100%-260px)] h-[60px] bg-transparent backdrop-blur-sm flex lg:justify-end items-center px-4 shadow-md z-[2000] transition-all duration-300 md:justify-between max-md:left-0 max-md:w-full">
       <button
         onClick={toggleSidebar}
@@ -85,7 +84,7 @@ export default function Home() {
         <span className="material-symbols-outlined text-2xl">menu</span>
       </button>
       
-      {/* Filters Group - Ensures spacing */}
+      
       <div className='flex items-center gap-2'> 
           <Dropdown
             label="Pages"
@@ -105,12 +104,12 @@ export default function Home() {
           <MetricCard title="Total Spend" value="$7,842" icon="cash-outline" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
             <div>
               <h2 className="text-xl font-semibold mb-4">Top Performing Content</h2>
               <div className="mt-4">
-                <ApexChart options={chartOptions} type="area" height={300} />
+                <ApexChart options={chartOptions} type="area" height={450} />
               </div>
             </div>
           </div>
@@ -118,7 +117,7 @@ export default function Home() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Summary</h2>
               <div className="mt-4">
-                <ApexChart options={chartOptions} type="area" height={300} />
+                <ApexChart options={chartOptions} type="area" height={450} />
               </div>
             </div>
           </div>
@@ -126,7 +125,7 @@ export default function Home() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Chart</h2>
               <div className="mt-4">
-                <ApexChart options={chartOptions} type="area" height={300} />
+                <ApexChart options={chartOptions} type="area" height={450} />
               </div>
             </div>
           </div>
@@ -134,7 +133,7 @@ export default function Home() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Chart</h2>
               <div className="mt-4">
-                <ApexChart options={chartOptions} type="area" height={300} />
+                <ApexChart options={chartOptions} type="area" height={450} />
               </div>
             </div>
           </div>

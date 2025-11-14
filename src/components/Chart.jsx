@@ -21,7 +21,8 @@ export default function ApexChart({ options = {}, series = [], type = 'area', he
     },
     tooltip: {
       x: {
-        format: 'dd/MM/yy HH:mm',
+        // FIXED: Removed fixed format ('dd/MM/yy HH:mm') 
+        // to allow parent component to control granularity-based formatting.
       },
     },
     ...options,
@@ -36,4 +37,3 @@ export default function ApexChart({ options = {}, series = [], type = 'area', he
     />
   )
 }
-

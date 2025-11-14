@@ -126,7 +126,7 @@ export default function Overview() {
               onClick={handleDownload}
               className="relative font-bold text-white bg-gray-900 py-2 px-8 border-none rounded-lg cursor-pointer overflow-hidden hover:bg-gray-800 flex justify-center items-center"
             >
-              <span className="relative z-10">Download Excel (XLSX)</span>
+              <span className="relative z-10">Download Table</span>
             </button>
           </div>
         </div>
