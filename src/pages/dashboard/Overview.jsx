@@ -44,19 +44,19 @@ export default function Overview() {
     // TODO: Fetch table data filtered by the selected filter
   }
 
-  // UPDATED: Function to download the data as an Excel sheet (XLSX)
+ 
   const handleDownload = () => {
-    // 1. Prepare data (add headers)
+    
     const worksheet = XLSX.utils.json_to_sheet(tableData);
 
-    // 2. Create a new workbook and append the worksheet
+    
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "OverviewData");
 
-    // 3. Write the workbook to a buffer (binary format)
+    
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     
-    // 4. Create a Blob and save the file
+   
     const data = new Blob([excelBuffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
     saveAs(data, `Overview_Report_${selectedFilter}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
@@ -76,7 +76,7 @@ export default function Overview() {
         </button>
         
         <Dropdown
-          label="Brands / Filter"
+          label="Page Selector"
           options={filterOptions}
           onSelect={handleFilterSelect}
           selectedValue={selectedFilter}

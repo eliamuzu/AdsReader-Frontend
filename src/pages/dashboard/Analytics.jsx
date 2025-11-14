@@ -83,7 +83,7 @@ export default function Analytics() {
         <span className="material-symbols-outlined text-2xl">menu</span>
       </button>
         <Dropdown
-          label="Pages"
+          label="Page Selector"
           options={filterOptions}
           onSelect={handleFilterSelect}
           selectedValue={selectedFilter}

@@ -9,7 +9,7 @@ import { get_pages,fetchPage } from '../../services/pages'
 export default function Home() {
   const { toggleSidebar } = useSidebar()
   const [filterOptions, setFilterOptions] = useState([])
-  const [selectedFilter, setSelectedFilter] = useState('All') // State for the filter
+  const [selectedFilter, setSelectedFilter] = useState('All') 
 
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function Home() {
       
       <div className='flex items-center gap-2'> 
           <Dropdown
-            label="Pages"
+            label="Page Selector"
             options={filterOptions}
             onSelect={handleFilterSelect}
             selectedValue={selectedFilter}
