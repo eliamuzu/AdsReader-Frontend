@@ -4,51 +4,9 @@ import Dropdown from '../../components/Dropdown'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
 import { useSidebar } from '../../contexts/SidebarContext'
+import { get_pages, fetchPage } from '../../services/pages'
 
-export default function Analytics() {
-  const { toggleSidebar } = useSidebar()
-  const [selectedFilter, setSelectedFilter] = useState('All')
-
-  useEffect(() => {
-    // Load ionicons
-    const script = document.createElement('script')
-    script.type = 'module'
-    script.src = 'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'
-    document.head.appendChild(script)
-
-    return () => {
-      document.head.removeChild(script)
-    }
-  }, [])
-
-  const filterOptions = [
-    'All',
-    'Bel-Ice',
-    'BelCola',
-    'Bel-Aqua',
-    'Bel-Beverages',
-    'BelPak',
-    'Bel7Star',
-    'Blowpak',
-    'Cricket',
-    'Prime Insurance',
-    'Moov',
-    'Novo',
-    'Holy Insecticide',
-  ]
-
-  const handleDateRangeChange = (range) => {
-    console.log('Date range changed:', range)
-  }
-
-  const handleFilterSelect = (filter) => {
-    setSelectedFilter(filter)
-    console.log('Filter selected:', filter)
-  }
-
- 
-
-  const chartOptions = {
+const chartOptions = {
     series: [
       {
         name: 'series1',
@@ -100,155 +58,228 @@ export default function Analytics() {
   }
 
   // 1. Donut Chart Data
-  const donutChartSeries = [44, 55, 41, 17, 15]
-  const donutChartOptions = {
-    labels: ['Organic', 'Paid Search', 'Social Media', 'Referral', 'Direct'],
-    chart: {
-      type: 'donut',
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 200,
-          },
-          legend: {
-            position: 'bottom',
-          },
-        },
-      },
-    ],
-  }
+  // const donutChartSeries = [44, 55, 41, 17, 15]
+  // const donutChartOptions = {
+  //   labels: ['Organic', 'Paid Search', 'Social Media', 'Referral', 'Direct'],
+  //   chart: {
+  //     type: 'donut',
+  //   },
+  //   responsive: [
+  //     {
+  //       breakpoint: 480,
+  //       options: {
+  //         chart: {
+  //           width: 200,
+  //         },
+  //         legend: {
+  //           position: 'bottom',
+  //         },
+  //       },
+  //     },
+  //   ],
+  // }
 
   // 2. Radial Bar Chart Data
-  const radialBarSeries = [78] // Represents 78% progress
-  const radialBarOptions = {
-    labels: ['Goal Completion'],
-    chart: {
-      type: 'radialBar',
-    },
-    plotOptions: {
-      radialBar: {
-        hollow: {
-          size: '70%',
-        },
-        dataLabels: {
-          showOn: 'always',
-          name: {
-            show: true,
-            fontSize: '22px',
-          },
-          value: {
-            show: true,
-            fontSize: '16px',
-            formatter: function (val) {
-              return val + '%'
-            },
-          },
-        },
-      },
-    },
-  }
+  // const radialBarSeries = [78] // Represents 78% progress
+  // const radialBarOptions = {
+  //   labels: ['Goal Completion'],
+  //   chart: {
+  //     type: 'radialBar',
+  //   },
+  //   plotOptions: {
+  //     radialBar: {
+  //       hollow: {
+  //         size: '70%',
+  //       },
+  //       dataLabels: {
+  //         showOn: 'always',
+  //         name: {
+  //           show: true,
+  //           fontSize: '22px',
+  //         },
+  //         value: {
+  //           show: true,
+  //           fontSize: '16px',
+  //           formatter: function (val) {
+  //             return val + '%'
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
+  // }
   
   // 3. Heatmap Chart Data
-  const heatmapSeries = [
-    {
-      name: 'Mon',
-      data: [{x: '9AM', y: 44}, {x: '10AM', y: 55}, {x: '11AM', y: 41}, {x: '12PM', y: 67}, {x: '1PM', y: 22}, {x: '2PM', y: 43}, {x: '3PM', y: 21}],
-    },
-    {
-      name: 'Tue',
-      data: [{x: '9AM', y: 13}, {x: '10AM', y: 23}, {x: '11AM', y: 20}, {x: '12PM', y: 8}, {x: '1PM', y: 5}, {x: '2PM', y: 12}, {x: '3PM', y: 27}],
-    },
-    {
-      name: 'Wed',
-      data: [{x: '9AM', y: 25}, {x: '10AM', y: 34}, {x: '11AM', y: 19}, {x: '12PM', y: 40}, {x: '1PM', y: 45}, {x: '2PM', y: 22}, {x: '3PM', y: 8}],
-    },
-    {
-      name: 'Thu',
-      data: [{x: '9AM', y: 49}, {x: '10AM', y: 58}, {x: '11AM', y: 23}, {x: '12PM', y: 40}, {x: '1PM', y: 43}, {x: '2PM', y: 22}, {x: '3PM', y: 8}],
-    },
-    {
-      name: 'Fri',
-      data: [{x: '9AM', y: 12}, {x: '10AM', y: 25}, {x: '11AM', y: 34}, {x: '12PM', y: 48}, {x: '1PM', y: 7}, {x: '2PM', y: 15}, {x: '3PM', y: 26}],
-    },
-  ];
+  // const heatmapSeries = [
+  //   {
+  //     name: 'Mon',
+  //     data: [{x: '9AM', y: 44}, {x: '10AM', y: 55}, {x: '11AM', y: 41}, {x: '12PM', y: 67}, {x: '1PM', y: 22}, {x: '2PM', y: 43}, {x: '3PM', y: 21}],
+  //   },
+  //   {
+  //     name: 'Tue',
+  //     data: [{x: '9AM', y: 13}, {x: '10AM', y: 23}, {x: '11AM', y: 20}, {x: '12PM', y: 8}, {x: '1PM', y: 5}, {x: '2PM', y: 12}, {x: '3PM', y: 27}],
+  //   },
+  //   {
+  //     name: 'Wed',
+  //     data: [{x: '9AM', y: 25}, {x: '10AM', y: 34}, {x: '11AM', y: 19}, {x: '12PM', y: 40}, {x: '1PM', y: 45}, {x: '2PM', y: 22}, {x: '3PM', y: 8}],
+  //   },
+  //   {
+  //     name: 'Thu',
+  //     data: [{x: '9AM', y: 49}, {x: '10AM', y: 58}, {x: '11AM', y: 23}, {x: '12PM', y: 40}, {x: '1PM', y: 43}, {x: '2PM', y: 22}, {x: '3PM', y: 8}],
+  //   },
+  //   {
+  //     name: 'Fri',
+  //     data: [{x: '9AM', y: 12}, {x: '10AM', y: 25}, {x: '11AM', y: 34}, {x: '12PM', y: 48}, {x: '1PM', y: 7}, {x: '2PM', y: 15}, {x: '3PM', y: 26}],
+  //   },
+  // ];
 
-  const heatmapOptions = {
-    chart: {
-      type: 'heatmap',
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    colors: ["#008FFB"],
-    title: {
-      text: 'Hourly Activity Intensity',
-    },
-    xaxis: {
-      type: 'category', // Override default 'datetime'
-      categories: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM'],
-    },
-    tooltip: {
-      x: {
-        show: true,
-        formatter: (val) => val,
-      },
-    },
-  };
+  // const heatmapOptions = {
+  //   chart: {
+  //     type: 'heatmap',
+  //   },
+  //   dataLabels: {
+  //     enabled: false,
+  //   },
+  //   colors: ["#008FFB"],
+  //   title: {
+  //     text: 'Hourly Activity Intensity',
+  //   },
+  //   xaxis: {
+  //     type: 'category', // Override default 'datetime'
+  //     categories: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM'],
+  //   },
+  //   tooltip: {
+  //     x: {
+  //       show: true,
+  //       formatter: (val) => val,
+  //     },
+  //   },
+  // };
 
-  // 4. Bubble Chart Data (3D data representation: X, Y, and Size)
-  const generateData = (baseval, count, yrange) => {
-    let i = 0;
-    let series = [];
-    while (i < count) {
-      let x = baseval;
-      let y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-      let z = Math.floor(Math.random() * (75 - 15 + 1)) + 15; // Size (Z)
-      series.push([x, y, z]);
-      baseval += 86400000; // Increment x by 1 day
-      i++;
+  // // 4. Bubble Chart Data (3D data representation: X, Y, and Size)
+  // const generateData = (baseval, count, yrange) => {
+  //   let i = 0;
+  //   let series = [];
+  //   while (i < count) {
+  //     let x = baseval;
+  //     let y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+  //     let z = Math.floor(Math.random() * (75 - 15 + 1)) + 15; // Size (Z)
+  //     series.push([x, y, z]);
+  //     baseval += 86400000; // Increment x by 1 day
+  //     i++;
+  //   }
+  //   return series;
+  // };
+
+  // const bubbleSeries = [
+  //   {
+  //     name: 'Product A',
+  //     data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 10, max: 60 }),
+  //   },
+  //   {
+  //     name: 'Product B',
+  //     data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 20, max: 70 }),
+  //   },
+  //   {
+  //     name: 'Product C',
+  //     data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 30, max: 80 }),
+  //   },
+  // ];
+
+  // const bubbleOptions = {
+  //   chart: {
+  //     type: 'bubble',
+  //   },
+  //   xaxis: {
+  //     tickAmount: 12,
+  //     type: 'datetime',
+  //     labels: {
+  //       formatter: function(val) {
+  //         return new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  //       }
+  //     }
+  //   },
+  //   yaxis: {
+  //     max: 100,
+  //   },
+  //   fill: {
+  //     opacity: 0.8,
+  //   },
+  // };
+
+export default function Analytics() {
+  const { toggleSidebar } = useSidebar()
+  const [filterOptions, setFilterOptions] = useState([])
+  const [selectedFilter, setSelectedFilter] = useState('All') 
+  const [chartData, setChartData] = useState(chartOptions);
+
+  useEffect(() => {
+    // Load ionicons
+    const script = document.createElement('script')
+    script.type = 'module'
+    script.src = 'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'
+    document.head.appendChild(script)
+
+    return () => {
+      document.head.removeChild(script)
     }
-    return series;
-  };
+  }, [])
 
-  const bubbleSeries = [
-    {
-      name: 'Product A',
-      data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 10, max: 60 }),
-    },
-    {
-      name: 'Product B',
-      data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 20, max: 70 }),
-    },
-    {
-      name: 'Product C',
-      data: generateData(new Date('11 Feb 2017 GMT').getTime(), 20, { min: 30, max: 80 }),
-    },
-  ];
-
-  const bubbleOptions = {
-    chart: {
-      type: 'bubble',
-    },
-    xaxis: {
-      tickAmount: 12,
-      type: 'datetime',
-      labels: {
-        formatter: function(val) {
-          return new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+   useEffect(() => {
+      const fetchPages = async () => {
+        try {
+          const response = await get_pages();
+          if (response) {
+            setFilterOptions(response);
+          }
+        } catch (error) {
+          console.error("Failed to fetch pages:", error);
         }
-      }
-    },
-    yaxis: {
-      max: 100,
-    },
-    fill: {
-      opacity: 0.8,
-    },
-  };
+      };
+  
+      fetchPages();
+    }, []);
+  
+    useEffect(() => {
+      const loadPageData = async () => {
+        if (selectedFilter === 'All') {
+          
+          setChartData(chartOptions);
+          return;
+        }
+        
+        try {
+          
+          const response = await fetchPage(selectedFilter); 
+          
+          if (response && response.series && response.xaxis) {
+            
+            setChartData(response);
+          } else {
+            
+            console.warn(`No valid data received for filter: ${selectedFilter}. Using default data.`);
+            setChartData(defaultChartData);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch data for ${selectedFilter}:`, error);
+         
+          setChartData(chartOptions);
+        }
+      };
+  
+      loadPageData();
+    }, [selectedFilter]);
+  
+  
 
+  const handleDateRangeChange = (range) => {
+    console.log('Date range changed:', range)
+  }
+
+  const handleFilterSelect = (filter) => {
+    setSelectedFilter(filter)
+    console.log('Filter selected:', filter)
+  }
 
   return (
     <div>

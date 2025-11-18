@@ -12,10 +12,12 @@ const defaultChartData = {
     {
       name: 'series1',
       data: [31, 40, 28, 51, 42, 109, 100],
+      // color: 'cyan',
     },
     {
       name: 'series2',
       data: [11, 32, 45, 32, 34, 52, 41],
+      // color: 'indigo',
     },
   ],
   xaxis: {
@@ -30,6 +32,7 @@ const defaultChartData = {
       '2018-09-19T06:30:00.000Z',
     ],
   },
+
 };
 const defaultChartDatas = {
   series: [
@@ -170,7 +173,7 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Total Reach Vrs Total Engagement</h2>
               <div className="mt-4">
                 {/* Use dynamic chartData */}
-                <ApexChart options={chartData} series={chartData.series} type="bar" height={420} />
+                <ApexChart options={chartData} series={chartData.series} type="bar" height={420} colors={chartData.color}   />
               </div>
             </div>
           </div>

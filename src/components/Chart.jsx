@@ -33,6 +33,7 @@ export default function ApexChart({ options = {}, series = [], type = 'line', he
       series={series}
       type={type}
       height={height}
+      colors={options.color}
     />
   )
 }

@@ -1,37 +1,65 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
 import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { get_pages, fetchPage } from '../../services/pages'
+
+const defaultTableData = [
+  { month: 'January', reach: 1000, engagement: 500, spend: 2000, views: 5000 },
+  { month: 'February', reach: 1200, engagement: 600, spend: 2500, views: 6000 },
+]
 
 export default function Overview() {
   const { toggleSidebar } = useSidebar()
+  const [filterOptions, setFilterOptions] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
+  const [tableData, setTableData] = useState(defaultTableData)
   
-  const filterOptions = [
-    'All',
-    'Bel-Ice',
-    'BelCola',
-    'Bel-Aqua',
-    'Bel-Beverages',
-    'BelPak',
-    'Bel7Star',
-    'Blowpak',
-    'Cricket',
-    'Prime Insurance',
-    'Moov',
-    'Novo',
-    'Holy Insecticide',
-  ]
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const response = await get_pages();
+        if (response) {
+          setFilterOptions(response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch pages:", error);
+      }
+    };
 
-  // NOTE: I've added a header row for the Excel export
-  const tableData = [
-    // Data objects
-    { month: 'January', reach: 1000, engagement: 500, spend: 2000, views: 5000 },
-    { month: 'February', reach: 1200, engagement: 600, spend: 2500, views: 6000 },
-    // You can use a state hook if the data changes, but using the constant array for the demo
-  ]
+    fetchPages();
+  }, []);
+
+  useEffect(() => {
+    const loadPageData = async () => {
+      if (selectedFilter === 'All') {
+        setTableData(defaultTableData)
+        return;
+      }
+      
+      try {
+        
+        const response = await fetchPage(selectedFilter); 
+        if (response && Array.isArray(response)) {
+          setTableData(response)
+        } else {
+          console.warn(`No valid data received for filter: ${selectedFilter}. Using default data.`)
+          setTableData(defaultTableData)
+        }
+      } catch (error) {
+        console.error(`Failed to fetch data for ${selectedFilter}:`, error);
+        setTableData(defaultTableData);
+      }
+    };
+
+    loadPageData();
+  }, [selectedFilter]);
+
+
+
+ 
 
   const handleDateRangeChange = (range) => {
     console.log('Date range changed:', range)
