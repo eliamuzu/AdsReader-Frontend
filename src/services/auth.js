@@ -4,7 +4,6 @@ export async function signIn(email, password) {
   try {
     // API expects password_hash as field name, but we pass the plain password
     const response = await api.post("/admin/login", { email, password_hash: password })
-    console.log(response.data)
     const token = response.data?.access_token
     if (token) {
       try {
