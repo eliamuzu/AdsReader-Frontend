@@ -78,7 +78,7 @@ export default function Overview() {
   const handlePlatformSelect = (platform) => {
     setSelectedPlatform(platform)
     console.log('Platform selected:', platform)
-    // TODO: Fetch data filtered by platform
+    // TODO: Fetch data filtered by platformt
   }
 
  

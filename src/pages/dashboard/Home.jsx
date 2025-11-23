@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
 import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { get_pages, fetchPage } from '../../services/pages'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
   
 const platformOptions = ['Facebook', 'Instagram']
@@ -67,6 +69,7 @@ export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState('All') 
   const [chartData, setChartData] = useState(defaultChartData);
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
+  const dashboardRef = useRef(null)
 
 
   useEffect(() => {
@@ -142,6 +145,67 @@ export default function Home() {
     console.log('Platform selected:', platform)
   }
 
+  const handleDownloadPDF = async () => {
+    if (!dashboardRef.current) return
+
+    try {
+      // Hide the header controls before capturing
+      const headerElement = document.querySelector('.fixed.top-0')
+      if (headerElement) {
+        headerElement.style.display = 'none'
+      }
+
+      // Wait a bit for charts to render
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const canvas = await html2canvas(dashboardRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+
+      // Restore header visibility
+      if (headerElement) {
+        headerElement.style.display = ''
+      }
+
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      const imgX = (pdfWidth - imgWidth * ratio) / 2
+      const imgY = 0
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
+      
+      let heightLeft = imgHeight * ratio
+      let position = imgY
+
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', imgX, position, imgWidth * ratio, imgHeight * ratio)
+        heightLeft -= pdfHeight
+      }
+
+      const fileName = `Dashboard_Home_${selectedFilter}_${selectedPlatform}_${new Date().toISOString().slice(0, 10)}.pdf`
+      pdf.save(fileName)
+      console.log('Dashboard downloaded as PDF')
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+
+      const headerElement = document.querySelector('.fixed.top-0')
+      if (headerElement) {
+        headerElement.style.display = ''
+      }
+    }
+  }
+
 
 
   return (
@@ -170,10 +234,18 @@ export default function Home() {
             selectedValue={selectedPlatform}
           />
           <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+          <button
+            onClick={handleDownloadPDF}
+            className="relative font-bold text-white bg-blue-600 py-2 px-4 border-none rounded-lg cursor-pointer overflow-hidden hover:bg-blue-700 flex justify-center items-center gap-2"
+            title="Download Dashboard as PDF"
+          >
+            <span className="material-symbols-outlined text-lg">download</span>
+            <span className="relative z-10">Download</span>
+          </button>
       </div>
     </div>
 
-      <div className="p-2.5 mr-5">
+      <div className="p-2.5 mr-5" ref={dashboardRef}>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
           <MetricCard title="Total Views" value="1,504" icon="eye-outline" />
           <MetricCard title="Total Reach" value="284" icon="globe-outline" />
