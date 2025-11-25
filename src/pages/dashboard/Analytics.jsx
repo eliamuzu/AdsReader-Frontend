@@ -400,89 +400,89 @@ export default function Analytics() {
         
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
           {/* 1. Bar Chart */}
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Reach Vrs Engagement</h2>
-              <div id="bar">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Reach Vrs Engagement</h2>
+              <div id="bar" className='flex-1 min-h-0'>
                 <ApexChart
                   options={{ ...chartOption, chart: { type: 'bar' } }}
                   series={chartOption.series}
                   type="bar"
-                  height={385}
+                  height="100%"
                 />
               </div>
             </div>
           </div>
           {/* 2. Line Chart */}
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Reach Over Time </h2>
-              <div id="Reach-line">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Reach Over Time </h2>
+              <div id="Reach-line" className='flex-1 min-h-0'>
                 <ApexChart
                   options={{ ...chartOptions, chart: { type: 'line' } }}
                   series={chartOptions.series}
                   type="line"
-                  height={385}
+                  height="100%"
                 />
               </div>
             </div>
           </div>
           {/* 3. Area Chart */}
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Engagement Over Time</h2>
-              <div className="mt-4">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Engagement Over Time</h2>
+              <div className="mt-4 flex-1 min-h-0">
                 <div id="line">
                   <ApexChart 
                     options={chartOptions} 
                     series={chartOptions.series}
                     type="line" 
-                    height={385} 
+                    height="100%" 
                   />
                 </div>
               </div>
             </div>
           </div>
           {/* 4. Line Chart (Second Instance) */}
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Spends</h2>
-              <div id="area">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Spends</h2>
+              <div id="area" className='flex-1 min-h-0'>
                 <ApexChart
                   options={{ ...chartOptions, chart: { type: 'line' } }}
                   series={chartOptions.series}
                   type="area"
-                  height={385}
+                  height="100%"
                 />
               </div>
             </div>
           </div>
           {/* 5. Area Chart */}
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Page Growth</h2>
-              <div className="mt-4">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Page Growth</h2>
+              <div className="mt-4 flex-1 min-h-0">
                 <div id="area">
                   <ApexChart 
                     options={chartOptions} 
                     series={chartOptions.series}
                     type="area" 
-                    height={385} 
+                    height="100%" 
                   />
                 </div>
               </div>
             </div>
           </div>
-          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Views Over Time</h2>
-              <div className="mt-4">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+            <div className='flex flex-col h-full'>
+              <h2 className="text-xl font-semibold mb-4 shrink-0">Views Over Time</h2>
+              <div className="mt-4 flex-1 min-h-0">
                 <div id="area">
                   <ApexChart 
                     options={chartOptions} 
                     series={chartOptions.series}
                     type="area" 
-                    height={385} 
+                    height="100%" 
                   />
                 </div>
               </div>
