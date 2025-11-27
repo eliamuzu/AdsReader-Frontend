@@ -3,8 +3,9 @@ import DateRangePicker from '../../components/DateRangePicker'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
 import Dropdown from '../../components/Dropdown'
+import LoadingIndicator from '../../components/LoadingIndicator'
 import { useSidebar } from '../../contexts/SidebarContext'
-import { get_pages, fetchPage } from '../../services/pages'
+import { get_pages, get_page_insights } from '../../services/pages'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
@@ -77,8 +78,18 @@ export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState('All') 
   const [chartData, setChartData] = useState(defaultChartData);
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
-  const [dateRange, setDateRange] = useState({since: null, until: null});
+  const [dateRange, setDateRange] = useState(() => {
+  const today = new Date();
+  const last30Days = new Date();
+  last30Days.setDate(today.getDate() - 30);
+
+  return {
+    since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
+  };
+});
   const [metrics, setMetrics] = useState(defaultMetrics);
+  const [isLoading, setIsLoading] = useState(true)
   const dashboardRef = useRef(null)
 
 
@@ -98,6 +109,7 @@ export default function Home() {
     const fetchPages = async () => {
       try {
         const response = await get_pages();
+        console.log("Fetched pages for filter options:", response);
         if (response) {
           setFilterOptions(response);
         }
@@ -112,10 +124,11 @@ export default function Home() {
 useEffect(() => {
     const fetchMetrics = async () => {
       if (!selectedFilter || !dateRange.since || !dateRange.until) {
-        setMetrics(defaultMetrics);
+        setMetrics(metrics);
         return;
       }
 
+      setIsLoading(true);
       try {
         console.log(
           `Fetching metrics for ${selectedFilter.name} (ID: ${selectedFilter.id}) from ${dateRange.since} to ${dateRange.until}`
@@ -139,22 +152,49 @@ useEffect(() => {
       } catch (error) {
         console.error('Failed to fetch metrics:', error);
         setMetrics(defaultMetrics);
+      } finally {
+        setIsLoading(false);
       }
     };
 
      fetchMetrics();
-  }, [selectedFilter, dateRange]);
+  }, [dateRange]);
 
 
   const handleDateRangeChange = (range) => {
     console.log('Date range changed:', range)
-    // TODO: Fetch data for the selected date range
+    setDateRange(range);
   }
 
-  const handleFilterSelect = (filter) => { // Handler for dropdown selection
-    setSelectedFilter(filter)
-    console.log('Filter selected:', filter)
+  const handleFilterSelect = async (filterId) => {
+  const selected = filterOptions.find((option) => option.id === filterId); // Find the selected option by id
+  setSelectedFilter(selected);
+
+  if (!selected) return;
+
+  console.log(`Fetching insights for ${selected.name} (ID: ${selected.id}) for the default 30-day range`);
+
+  setIsLoading(true);
+  try {
+    const insights = await get_page_insights(selected.id, dateRange.since, dateRange.until); // Call without date range
+    console.log('Fetched insights:', insights);
+
+    // Map insights to metrics
+    const updatedMetrics = {
+      totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+      totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+      totalEngagement: insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+      totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+    };
+
+    setMetrics(updatedMetrics); // Update metrics state
+  } catch (error) {
+    console.error('Failed to fetch insights:', error);
+    setMetrics(defaultMetrics); // Reset to default metrics on error
+  } finally {
+    setIsLoading(false);
   }
+};
 
   const handlePlatformSelect = (platform) => {
     setSelectedPlatform(platform)
@@ -243,8 +283,8 @@ useEffect(() => {
               value: option.id,
               label: option.name
             }))}
-            onSelect={handleFilterSelect}
-            selectedValue={selectedFilter}
+            onSelect={(filterId) => handleFilterSelect(filterId)}
+            selectedValue={selectedFilter?.id}
           />
           <Dropdown
             label="Platform"
@@ -265,12 +305,16 @@ useEffect(() => {
     </div>
 
       <div className="p-2.5 mr-5" ref={dashboardRef}>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
-          <MetricCard title="Total Views" value="1,504" icon="eye-outline" />
-          <MetricCard title="Total Reach" value="284" icon="globe-outline" />
-          <MetricCard title="Total Engagement" value="284" icon="megaphone-outline" />
-          <MetricCard title="Total Spend" value="$7,842" icon="cash-outline" />
-        </div>
+         {isLoading ? (
+          <LoadingIndicator message="Fetching insights..." />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
+            <MetricCard title="Total Views" value={metrics.totalViews} icon="eye-outline" />
+            <MetricCard title="Total Reach" value={metrics.totalReach} icon="globe-outline" />
+            <MetricCard title="Total Engagement" value={metrics.totalEngagement} icon="megaphone-outline" />
+            <MetricCard title="Total Spend" value={`$${metrics.totalSpend}`} icon="cash-outline" />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
           <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
