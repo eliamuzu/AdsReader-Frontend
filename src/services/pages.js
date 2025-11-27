@@ -15,10 +15,10 @@ export async function  get_pages() {
   try {
     const response = await api.get('/api/pages')
     const pages = response.data
-    
+  
     const mappedPages = pages.map((page) => ({
       id: page.id,
-      name: page.name
+      name: page.page_name
     }));
     
     return mappedPages
@@ -31,10 +31,12 @@ export async function  get_pages() {
 export async function get_page_insights(pageId, since, until) {
   try { 
     const response = await api.get(`/api/pages/${pageId}/insights?since=${since}&until=${until}`)
+    console.log('Insights response:', response.data);
 
-    const mappedInsights = response.data.map((insights) => ({
-      name : insights.name,
-      value : insights.value
+
+    const mappedInsights = response.data.data.map((insight) => ({
+      name : insight.metric_name,
+      value : insight .total_value.toLocaleString(),
     }))
 
     return mappedInsights
