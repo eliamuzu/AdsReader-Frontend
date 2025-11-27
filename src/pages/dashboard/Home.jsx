@@ -11,6 +11,14 @@ import jsPDF from 'jspdf'
   
 const platformOptions = ['Facebook', 'Instagram']
 
+const defaultMetrics = {
+  totalViews: 0,
+  totalReach: 0,
+  totalEngagement: 0,
+  totalSpend: 0,
+};
+
+
 const defaultChartData = {
   series: [
     {
@@ -69,6 +77,8 @@ export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState('All') 
   const [chartData, setChartData] = useState(defaultChartData);
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
+  const [dateRange, setDateRange] = useState({since: null, until: null});
+  const [metrics, setMetrics] = useState(defaultMetrics);
   const dashboardRef = useRef(null)
 
 
@@ -99,35 +109,41 @@ export default function Home() {
     fetchPages();
   }, []);
 
-  useEffect(() => {
-    const loadPageData = async () => {
-      if (selectedFilter === 'All') {
-        
-        setChartData(defaultChartData);
+useEffect(() => {
+    const fetchMetrics = async () => {
+      if (!selectedFilter || !dateRange.since || !dateRange.until) {
+        setMetrics(defaultMetrics);
         return;
       }
-      
+
       try {
-        console.log(`Loading data for ${selectedFilter} on ${selectedPlatform}`)
-        const response = await fetchPage(selectedFilter); 
-        
-        if (response && response.series && response.xaxis) {
-          
-          setChartData(response);
-        } else {
-          
-          console.warn(`No valid data received for filter: ${selectedFilter}. Using default data.`);
-          setChartData(defaultChartData);
-        }
+        console.log(
+          `Fetching metrics for ${selectedFilter.name} (ID: ${selectedFilter.id}) from ${dateRange.since} to ${dateRange.until}`
+        );
+        const insights = await get_page_insights(
+          selectedFilter.id,
+          dateRange.since,
+          dateRange.until
+        );
+
+        // Map insights to metrics
+        const updatedMetrics = {
+          totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+          totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+          totalEngagement:
+            insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+          totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+        };
+
+        setMetrics(updatedMetrics);
       } catch (error) {
-        console.error(`Failed to fetch data for ${selectedFilter}:`, error);
-       
-        setChartData(defaultChartData);
+        console.error('Failed to fetch metrics:', error);
+        setMetrics(defaultMetrics);
       }
     };
 
-    loadPageData();
-  }, [selectedFilter, selectedPlatform]);
+     fetchMetrics();
+  }, [selectedFilter, dateRange]);
 
 
   const handleDateRangeChange = (range) => {
@@ -223,7 +239,10 @@ export default function Home() {
       <div className='flex items-center gap-2'> 
           <Dropdown
             label="Page Selector"
-            options={filterOptions}
+            options={filterOptions.map((option) => ({
+              value: option.id,
+              label: option.name
+            }))}
             onSelect={handleFilterSelect}
             selectedValue={selectedFilter}
           />
