@@ -380,7 +380,68 @@ useEffect(() => {
             </div>
           </div>
         </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
+  {/* Chart 1 */}
+  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+    <div className="flex flex-col h-full">
+      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Reach Vrs Total Engagement</h2>
+      <div className="flex-1 min-h-0">
+        <ApexChart 
+            options={chartData} 
+            series={chartData.series} 
+            type="bar" 
+            height="100%" 
+            colors={chartData.color} 
+        />
       </div>
     </div>
+  </div>
+
+  {/* Chart 2 */}
+  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+    <div className="flex flex-col h-full">
+      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Reach</h2>
+      <div className="flex-1 min-h-0">
+        <ApexChart 
+            options={defaultChartDatas} 
+            series={defaultChartDatas.series} 
+            type="area" 
+            height="100%" 
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Chart 3 */}
+  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+    <div className="flex flex-col h-full">
+      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Engagement</h2>
+      <div className="flex-1 min-h-0">
+        <ApexChart 
+            options={defaultChartDatas} 
+            series={defaultChartDatas.series} 
+            type="area" 
+            height="100%" 
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Chart 4 */}
+  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
+    <div className="flex flex-col h-full">
+      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Spend</h2>
+      <div className="flex-1 min-h-0">
+        <ApexChart 
+            options={defaultChartDatas} 
+            series={defaultChartDatas.series} 
+            type="line" 
+            height="100%" 
+        />
+      </div>
+    </div>
+  </div>
+</div>
+</div>
   )
 }
