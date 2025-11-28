@@ -93,20 +93,24 @@ export default function DateRangePicker({ onDateRangeChange }) {
     }
   }
 
-  const handleApply = () => {
-    if (startDate && endDate && onDateRangeChange) {
-      
-      const start = startDate <= endDate ? startDate : endDate
-      const end = startDate <= endDate ? endDate : startDate
-      onDateRangeChange({ start, end })
-    }
-    setIsOpen(false)
-  }
+const handleApply = () => {
+  if (startDate && endDate && onDateRangeChange) {
+    const start = startDate <= endDate ? startDate : endDate;
+    const end = startDate <= endDate ? endDate : startDate;
 
-  const handleCancel = () => {
+    // Format the dates as "YYYY-MM-DD"
+    const formattedStart = formatDate(start);
+    const formattedEnd = formatDate(end);
+
+    onDateRangeChange({ since: formattedStart, until: formattedEnd });
+  }
+  setIsOpen(false);
+};
+
+const handleCancel = () => {
     setStartDate(null)
     setEndDate(null)
-  }
+}
   
   
   const navigateMonth = (direction) => {
