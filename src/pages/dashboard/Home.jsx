@@ -3,13 +3,22 @@ import DateRangePicker from '../../components/DateRangePicker'
 import MetricCard from '../../components/MetricCard'
 import ApexChart from '../../components/Chart'
 import Dropdown from '../../components/Dropdown'
+import LoadingIndicator from '../../components/LoadingIndicator'
 import { useSidebar } from '../../contexts/SidebarContext'
-import { get_pages, fetchPage } from '../../services/pages'
+import { get_pages, get_page_insights } from '../../services/pages'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
   
 const platformOptions = ['Facebook', 'Instagram']
+
+const defaultMetrics = {
+  totalViews: 0,
+  totalReach: 0,
+  totalEngagement: 0,
+  totalSpend: 0,
+};
+
 
 const defaultChartData = {
   series: [
@@ -69,6 +78,18 @@ export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState('All') 
   const [chartData, setChartData] = useState(defaultChartData);
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
+  const [dateRange, setDateRange] = useState(() => {
+  const today = new Date();
+  const last30Days = new Date();
+  last30Days.setDate(today.getDate() - 30);
+
+  return {
+    since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
+  };
+});
+  const [metrics, setMetrics] = useState(defaultMetrics);
+  const [isLoading, setIsLoading] = useState(true)
   const dashboardRef = useRef(null)
 
 
@@ -99,46 +120,107 @@ export default function Home() {
     fetchPages();
   }, []);
 
-  useEffect(() => {
-    const loadPageData = async () => {
-      if (selectedFilter === 'All') {
-        
-        setChartData(defaultChartData);
+useEffect(() => {
+    const fetchMetrics = async () => {
+      if (!selectedFilter || !dateRange.since || !dateRange.until) {
+        setMetrics(metrics);
         return;
       }
-      
+
+      setIsLoading(true);
       try {
-        console.log(`Loading data for ${selectedFilter} on ${selectedPlatform}`)
-        const response = await fetchPage(selectedFilter); 
-        
-        if (response && response.series && response.xaxis) {
-          
-          setChartData(response);
-        } else {
-          
-          console.warn(`No valid data received for filter: ${selectedFilter}. Using default data.`);
-          setChartData(defaultChartData);
-        }
+        console.log(
+          `Fetching metrics for ${selectedFilter.name} (ID: ${selectedFilter.id}) from ${dateRange.since} to ${dateRange.until}`
+        );
+        const insights = await get_page_insights(
+          selectedFilter.id,
+          dateRange.since,
+          dateRange.until
+        );
+
+        // Map insights to metrics 
+        const updatedMetrics = {
+          totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+          totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+          totalEngagement:
+            insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+          totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+        };
+
+        setMetrics(updatedMetrics);
       } catch (error) {
-        console.error(`Failed to fetch data for ${selectedFilter}:`, error);
-       
-        setChartData(defaultChartData);
+        console.error('Failed to fetch metrics:', error);
+        setMetrics(defaultMetrics);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadPageData();
-  }, [selectedFilter, selectedPlatform]);
+     fetchMetrics();
+  }, [dateRange]);
 
 
-  const handleDateRangeChange = (range) => {
-    console.log('Date range changed:', range)
-    // TODO: Fetch data for the selected date range
-  }
+  const handleDateRangeChange = async (range) => {
+    console.log('Date range changed:', range);
+    setDateRange(range);
 
-  const handleFilterSelect = (filter) => { // Handler for dropdown selection
-    setSelectedFilter(filter)
-    console.log('Filter selected:', filter)
-  }
+    if (!selectedFilter) {
+      console.warn('No filter selected. Skipping fetch.');
+      return;
+    }
+
+    setIsLoading(true); // Set loading to true before fetching
+    try {
+      console.log(
+        `Fetching metrics for ${selectedFilter.name} (ID: ${selectedFilter.id}) from ${range.since} to ${range.until}`
+      );
+      const insights = await get_page_insights(selectedFilter.id, range.since, range.until);
+
+      // Map insights to metrics
+      const updatedMetrics = {
+        totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+        totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+        totalEngagement: insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+        totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+      };
+
+      setMetrics(updatedMetrics); // Update metrics state
+    } catch (error) {
+      console.error('Failed to fetch insights:', error);
+      setMetrics(defaultMetrics); // Reset to default metrics on error
+    } finally {
+      setIsLoading(false); // Set loading to false after fetching is complete
+    }
+  };
+
+  const handleFilterSelect = async (filterId) => {
+    const selected = filterOptions.find((option) => option.id === filterId); // Find the selected option by id
+    setSelectedFilter(selected);
+
+    if (!selected) return;
+
+    console.log(`Fetching insights for ${selected.name} (ID: ${selected.id}) for the default 30-day range`);
+
+    setIsLoading(true);
+    try {
+      const insights = await get_page_insights(selected.id, dateRange.since, dateRange.until); // Call without date range
+
+      // Map insights to metrics
+      const updatedMetrics = {
+        totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+        totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+        totalEngagement: insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+        totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+      };
+
+      setMetrics(updatedMetrics); // Update metrics state
+    } catch (error) {
+      console.error('Failed to fetch insights:', error);
+      setMetrics(defaultMetrics); // Reset to default metrics on error
+    } finally {
+      setIsLoading(false);
+    }
+};
 
   const handlePlatformSelect = (platform) => {
     setSelectedPlatform(platform)
@@ -223,9 +305,12 @@ export default function Home() {
       <div className='flex items-center gap-2'> 
           <Dropdown
             label="Page Selector"
-            options={filterOptions}
-            onSelect={handleFilterSelect}
-            selectedValue={selectedFilter}
+            options={filterOptions.map((option) => ({
+              value: option.id,
+              label: option.name
+            }))}
+            onSelect={(filterId) => handleFilterSelect(filterId)}
+            selectedValue={selectedFilter?.id}
           />
           <Dropdown
             label="Platform"
@@ -245,6 +330,56 @@ export default function Home() {
       </div>
     </div>
 
+      <div className="p-2.5 mr-5" ref={dashboardRef}>
+         {isLoading ? (
+          <LoadingIndicator message="Fetching insights..." />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 p-2.5 mr-5">
+            <MetricCard title="Total Views" value={metrics.totalViews} icon="eye-outline" />
+            <MetricCard title="Total Reach" value={metrics.totalReach} icon="globe-outline" />
+            <MetricCard title="Total Engagement" value={metrics.totalEngagement} icon="megaphone-outline" />
+            <MetricCard title="Total Spend" value={`$${metrics.totalSpend}`} icon="cash-outline" />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Total Reach Vrs Total Engagement</h2>
+              <div className="mt-4">
+                {/* Use dynamic chartData */}
+                <ApexChart options={chartData} series={chartData.series} type="bar" height={385} colors={chartData.color}   />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Total Reach</h2>
+              <div className="mt-4">
+                {/* Use dynamic chartData */}
+                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="area" height={385} />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Total Engagement </h2>
+              <div className="mt-4">
+                {/* Use dynamic chartData */}
+                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="area" height={385} />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Total Spend</h2>
+              <div className="mt-4">
+                {/* Use dynamic chartData, overriding type to line */}
+                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="line" height={385} />
+              </div>
+            </div>
+          </div>
+        </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 p-2.5 mr-5 mt-2.5">
   {/* Chart 1 */}
   <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">

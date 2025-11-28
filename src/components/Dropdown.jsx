@@ -25,31 +25,14 @@ export default function Dropdown({ label, options = [], onSelect, selectedValue 
     }
   }, [isOpen])
 
-  const handleSelect = (option) => {
+  const handleSelect = (value) => {
     if (onSelect) {
-      onSelect(option)
+      onSelect(value) // Pass the selected value to the parent
     }
     setIsOpen(false)
   }
 
-  const selectedLabel = (() => {
-    if (!selectedValue || selectedValue === 'Select an option') {
-      return selectedValue || label
-    }
-
-    const matchedOption = options.find((option) => {
-      if (typeof option === 'string') {
-        return option === selectedValue
-      }
-      return option?.value === selectedValue
-    })
-
-    if (matchedOption) {
-      return getOptionLabel(matchedOption)
-    }
-
-    return selectedValue || label
-  })()
+  const selectedLabel = options.find((option) => option.value === selectedValue)?.label || label
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>
@@ -57,31 +40,22 @@ export default function Dropdown({ label, options = [], onSelect, selectedValue 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 py-2 px-4 bg-white border border-gray-300 rounded cursor-pointer text-sm text-gray-800 transition-all font-medium hover:bg-gray-50 hover:border-primary"
       >
-        {selectedLabel || label}
+        {selectedLabel}
         <span className="material-symbols-outlined text-xl">arrow_drop_down</span>
       </button>
       {isOpen && (
         <div className="absolute bg-white min-w-[160px] shadow-lg z-10 rounded top-full right-0 mt-1">
-          {options.map((option, idx) => {
-            const isSelected = selectedValue === option.value || selectedValue === option
-            return (
-              <button
-                key={idx}
-                onClick={() => handleSelect(option.value || option)}
-                className={`w-full text-left px-4 py-3 text-gray-800 no-underline block transition-colors ${
-                  idx === 0 ? 'rounded-t' : ''
-                } ${
-                  idx === options.length - 1 ? 'rounded-b' : ''
-                } ${
-                  isSelected
-                    ? 'bg-green-50 text-primary font-semibold relative pl-8 before:content-["✓"] before:absolute before:left-2 before:top-1/2 before:-translate-y-1/2 before:text-primary before:text-sm'
-                    : 'hover:bg-gray-100 hover:text-primary'
-                }`}
-              >
-                {option.label || option}
-              </button>
-            )
-          })}
+          {options.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => handleSelect(option.value)}
+              className={`w-full text-left px-4 py-3 text-gray-800 no-underline block transition-colors ${
+                selectedValue === option.value ? 'bg-green-50 text-primary font-semibold' : 'hover:bg-gray-100 hover:text-primary'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { SidebarProvider } from './contexts/SidebarContext'
+import LoadingIndicator from './components/LoadingIndicator'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 import ForgotPassword from './pages/auth/ForgotPassword'
@@ -13,13 +14,30 @@ import Profile from './pages/dashboard/Profile'
 import Settings from './pages/dashboard/Settings'
 
 function PrivateRoute({ children }) {
-  const { isAuthenticated } = useAuth()
-  return isAuthenticated ? children : <Navigate to="/login" replace />
+  const { isAuthenticated, loading } = useAuth(); // Add loading state
+
+  if (loading) {
+    // Show a loading indicator while authentication state is being determined
+    return <LoadingIndicator message="Loading..." />;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
-  const { isAuthenticated } = useAuth()
-  return !isAuthenticated ? children : <Navigate to="/home" replace />
+  const { isAuthenticated, loading } = useAuth(); // Add loading state
+
+  if (loading) {
+    // Show a loading indicator while authentication state is being determined
+    return (
+      <div className='h-full flex items-center justify-center'>
+        <LoadingIndicator message="Loading..." />
+      </div>
+    )
+      
+  }
+
+  return !isAuthenticated ? children : <Navigate to="/home" replace />;
 }
 
 function AppRoutes() {
