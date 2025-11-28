@@ -31,15 +31,15 @@ export async function  get_pages() {
 export async function get_page_insights(pageId, since, until) {
   try { 
     const response = await api.get(`/api/pages/${pageId}/insights?since=${since}&until=${until}`)
-    console.log('Insights response:', response.data);
-
 
     const mappedInsights = response.data.data.map((insight) => ({
       name : insight.metric_name,
       value : insight .total_value.toLocaleString(),
     }))
 
-    return mappedInsights
+    const rawData = response.data.raw_data.data
+    return [mappedInsights, rawData]
+
   } catch (error) { 
       console.error("Error fetching insights: ", error)
       throw error
