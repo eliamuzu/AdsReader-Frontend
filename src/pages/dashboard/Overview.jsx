@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import DateRangePicker from '../../components/DateRangePicker'
 import Dropdown from '../../components/Dropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
-import * as XLSX from 'xlsx';
+import { useFilter } from '../../contexts/FilterContext'
+import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver';
-import { get_pages, fetchPage } from '../../services/pages'
+import { get_pages, get_page_insights} from '../../services/pages'
 
 const platformOptions = ['Facebook', 'Instagram']
 
@@ -15,10 +16,21 @@ const defaultTableData = [
 
 export default function Overview() {
   const { toggleSidebar } = useSidebar()
+  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData } = useFilter()
+
   const [filterOptions, setFilterOptions] = useState([])
-  const [selectedFilter, setSelectedFilter] = useState('All')
   const [tableData, setTableData] = useState(defaultTableData)
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
+  const [dateRange, setDateRange] = useState(() => {
+  const today = new Date();
+  const last30Days = new Date();
+  last30Days.setDate(today.getDate() - 30);
+
+  return {
+    since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
+  };
+});
   
   useEffect(() => {
     const fetchPages = async () => {
@@ -35,45 +47,83 @@ export default function Overview() {
     fetchPages();
   }, []);
 
-  useEffect(() => {
-    const loadPageData = async () => {
-      if (selectedFilter === 'All') {
-        setTableData(defaultTableData)
-        return;
-      }
-      
-      try {
-        console.log(`Loading data for ${selectedFilter} on ${selectedPlatform}`)
-        const response = await fetchPage(selectedFilter); 
-        if (response && Array.isArray(response)) {
-          setTableData(response)
+useEffect(() => {
+  const loadPageData = async () => {
+    if (!selectedFilter || selectedFilter === 'All') {
+      setTableData(defaultTableData);
+      return;
+    }
+
+    try {
+      let rawData = insightsData; // Use global insights data if available
+      console.log('Using global insights data:', rawData);
+
+      if (!rawData) {
+        console.log('Global insights data not available. Fetching from backend...');
+        const responseData = await get_page_insights(selectedFilter.id, dateRange.since, dateRange.until); // Fetch from backend
+        if (responseData) {
+          const [inisghts, rawData] = responseData; // Set rawData to the fetched data
+          console.log('Fetched insights data from backend:', rawData);
+          setInsightsData(rawData); // Update the global insights data
         } else {
-          console.warn(`No valid data received for filter: ${selectedFilter}. Using default data.`)
-          setTableData(defaultTableData)
+          console.warn('No valid data received from backend.'); 
+          setTableData(defaultTableData);
+          return;
         }
-      } catch (error) {
-        console.error(`Failed to fetch data for ${selectedFilter}:`, error);
-        setTableData(defaultTableData);
       }
-    };
 
-    loadPageData();
-  }, [selectedFilter, selectedPlatform]);
+      // Process raw data and aggregate by date
+      const processedData = rawData.reduce((acc, metric) => {
+        metric.values.forEach((value) => {
+          // Normalize the date to remove the time component
+          const normalizedDate = new Date(value.end_time).toLocaleDateString();
 
+          const existingRow = acc.find((row) => row.date === normalizedDate);
 
+          if (existingRow) {
+            // Add the metric value to the existing row
+            if (metric.name === 'page_impressions_unique') {
+              existingRow.reach += value.value;
+            } else if (metric.name === 'page_media_view') {
+              existingRow.views += value.value;
+            } else if (metric.name === 'page_post_engagements') {
+              existingRow.engagement += value.value;
+            }
+          } else {
+            // Create a new row for this date
+            acc.push({
+              date: normalizedDate, // Use the normalized date
+              reach: metric.name === 'page_impressions_unique' ? value.value : 0,
+              views: metric.name === 'page_media_view' ? value.value : 0,
+              engagement: metric.name === 'page_post_engagements' ? value.value : 0,
+              spend: 0, // Add spend if available in the raw data
+            });
+          }
+        });
+        return acc;
+      }, []);
 
- 
+      setTableData(processedData);
+    } catch (error) {
+      console.error(`Failed to fetch data for ${selectedFilter.name}:`, error);
+      setTableData(defaultTableData);
+    }
+  };
+
+  loadPageData();
+}, [selectedFilter, insightsData]);
+
 
   const handleDateRangeChange = (range) => {
     console.log('Date range changed:', range)
     // TODO: Fetch table data for the selected date range
   }
 
-  const handleFilterSelect = (filter) => {
-    setSelectedFilter(filter)
-    console.log('Filter selected:', filter)
-    // TODO: Fetch table data filtered by the selected filter
-  }
+  const handleFilterSelect = async (filterId) => {
+    const selected = filterOptions.find(option => option.id === filterId);
+    setSelectedFilter(selected);
+    setInsightsData(null); // Clear previous insights data
+};
 
   const handlePlatformSelect = (platform) => {
     setSelectedPlatform(platform)
@@ -113,12 +163,15 @@ export default function Overview() {
         </button>
         
         <div className="flex items-center gap-2">
-          <Dropdown
-            label="Page Selector"
-            options={filterOptions}
-            onSelect={handleFilterSelect}
-            selectedValue={selectedFilter}
-          />
+        <Dropdown
+          label="Page Selector"
+          options={filterOptions.map((option) => ({
+            value: option.id,
+            label: option.name
+          }))}
+          onSelect={(filterId) => handleFilterSelect(filterId)}
+          selectedValue={selectedFilter?.id}
+        />
           <Dropdown
             label="Platform"
             options={platformOptions}
@@ -145,10 +198,10 @@ export default function Overview() {
                     Engagement
                   </th>
                   <th className="p-3 border border-gray-300 text-left bg-[#273c75] text-white">
-                    Spend
+                    Views
                   </th>
                   <th className="p-3 border border-gray-300 text-left bg-[#273c75] text-white">
-                    Views
+                    Spend
                   </th>
                 </tr>
               </thead>
@@ -158,8 +211,8 @@ export default function Overview() {
                     <td className="p-3 border border-gray-300">{row.date}</td>
                     <td className="p-3 border border-gray-300">{row.reach}</td>
                     <td className="p-3 border border-gray-300">{row.engagement}</td>
-                    <td className="p-3 border border-gray-300">${row.spend}</td>
                     <td className="p-3 border border-gray-300">{row.views}</td>
+                    <td className="p-3 border border-gray-300">${row.spend}</td>
                   </tr>
                 ))}
               </tbody>

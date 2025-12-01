@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { SidebarProvider } from './contexts/SidebarContext'
+import {FilterProvider} from './contexts/FilterContext'
 import LoadingIndicator from './components/LoadingIndicator'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
@@ -64,7 +65,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppRoutes />
+        <FilterProvider>
+          <AppRoutes />
+        </FilterProvider>
       </AuthProvider>
     </Router>
   )
