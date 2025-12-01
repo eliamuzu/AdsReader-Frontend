@@ -83,13 +83,13 @@ export default function Home() {
   const [dateRange, setDateRange] = useState(() => {
   const today = new Date();
   const last30Days = new Date();
-  last30Days.setDate(today.getDate() - 30);
+    last30Days.setDate(today.getDate() - 30);
 
-  return {
-    since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
-    until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
-  };
-});
+    return {
+      since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    }; 
+  });
   const [metrics, setMetrics] = useState(defaultMetrics);
   const [isLoading, setIsLoading] = useState(false)
   const dashboardRef = useRef(null)
@@ -127,6 +127,20 @@ export default function Home() {
     const loadPageData = async () => {
     if (!selectedFilter) return;
 
+    if(insightsData[0]) {
+      console.log('Using existing global insights data:', insightsData);
+
+      const updatedMetrics = {
+          totalViews: insightsData[0].find((i) => i.name === 'page_media_view')?.value || 0,
+          totalReach: insightsData[0].find((i) => i.name === 'page_impressions_unique')?.value || 0,
+          totalEngagement: insightsData[0].find((i) => i.name === 'page_post_engagements')?.value || 0,
+          totalSpend: insightsData[0].find((i) => i.name === 'total_spend')?.value || 0,
+        };
+
+        setMetrics(updatedMetrics);
+        return;
+    }
+
     try {
       setIsLoading(true);
       const responseData = await get_page_insights(selectedFilter.id, dateRange.since, dateRange.until); // Call without date range
@@ -141,7 +155,7 @@ export default function Home() {
       };
 
       setMetrics(updatedMetrics); // Update metrics state
-      setInsightsData(rawData); // Update global insights data
+      setInsightsData(responseData); // Update global insights data
     } catch (error) {
       console.error('Failed to fetch insights:', error);
       setMetrics(defaultMetrics); // Reset to default metrics on error
@@ -150,43 +164,43 @@ export default function Home() {
     }
   }
     loadPageData();
-  }, [selectedFilter]);
+  }, [selectedFilter, insightsData]);
 
-useEffect(() => {
-    const fetchMetrics = async () => {
-      if (!selectedFilter || !dateRange.since || !dateRange.until) {
-        setMetrics(metrics);
-        return;
-      }
+// useEffect(() => {
+//     const fetchMetrics = async () => {
+//       if (!selectedFilter || !dateRange.since || !dateRange.until) {
+//         setMetrics(metrics);
+//         return;
+//       }
 
-      setIsLoading(true);
-      try {
-        const insights = await get_page_insights(
-          selectedFilter.id,
-          dateRange.since,
-          dateRange.until
-        );
+//       setIsLoading(true);
+//       try {
+//         const insights = await get_page_insights(
+//           selectedFilter.id,
+//           dateRange.since,
+//           dateRange.until
+//         );
 
-        // Map insights to metrics 
-        const updatedMetrics = {
-          totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
-          totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
-          totalEngagement:
-          insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
-          totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
-        };
+//         // Map insights to metrics 
+//         const updatedMetrics = {
+//           totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
+//           totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
+//           totalEngagement:
+//           insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
+//           totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+//         };
 
-        setMetrics(updatedMetrics);
-      } catch (error) {
-        console.error('Failed to fetch metrics:', error);
-        setMetrics(defaultMetrics);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+//         setMetrics(updatedMetrics);
+//       } catch (error) {
+//         console.error('Failed to fetch metrics:', error);
+//         setMetrics(defaultMetrics);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
 
-     fetchMetrics();
-  }, [dateRange]);
+//      fetchMetrics();
+//   }, [dateRange]);
 
 
   const handleDateRangeChange = async (range) => {
@@ -205,10 +219,10 @@ useEffect(() => {
 
       // Map insights to metrics
       const updatedMetrics = {
-        totalViews: insights.find((i) => i.name === 'page_media_view')?.value || 0,
-        totalReach: insights.find((i) => i.name === 'page_impressions_unique')?.value || 0,
-        totalEngagement: insights.find((i) => i.name === 'page_post_engagements')?.value || 0,
-        totalSpend: insights.find((i) => i.name === 'total_spend')?.value || 0,
+        totalViews: insights[0].find((i) => i.name === 'page_media_view')?.value || 0,
+        totalReach: insights[0].find((i) => i.name === 'page_impressions_unique')?.value || 0,
+        totalEngagement: insights[0].find((i) => i.name === 'page_post_engagements')?.value || 0,
+        totalSpend: insights[0].find((i) => i.name === 'total_spend')?.value || 0,
       };
 
       setMetrics(updatedMetrics); // Update metrics state
@@ -223,6 +237,7 @@ useEffect(() => {
   const handleFilterSelect = async (filterId) => {
     const selected = filterOptions.find(option => option.id === filterId);
     setSelectedFilter(selected);
+    setInsightsData([]); // Clear existing insights data on filter change
 };
 
   const handlePlatformSelect = (platform) => {
@@ -313,7 +328,7 @@ useEffect(() => {
               label: option.name
             }))}
             onSelect={(filterId) => handleFilterSelect(filterId)}
-            selectedValue={selectedFilter}
+            selectedValue={selectedFilter?.id}
           />
           <Dropdown
             label="Platform"
