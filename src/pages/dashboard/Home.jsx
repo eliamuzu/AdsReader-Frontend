@@ -21,69 +21,27 @@ const defaultMetrics = {
 };
 
 
-const defaultChartData = {
-  series: [
-    {
-      name: 'series1',
-      data: [31, 40, 28, 51, 42, 109, 100],
-      // color: 'cyan',
-    },
-    {
-      name: 'series2',
-      data: [11, 32, 45, 32, 34, 52, 41],
-      // color: 'indigo',
-    },
-  ],
-  xaxis: {
-    type: 'datetime',
-    categories: [
-      '2018-09-19T00:00:00.000Z',
-      '2018-09-19T01:30:00.000Z',
-      '2018-09-19T02:30:00.000Z',
-      '2018-09-19T03:30:00.000Z',
-      '2018-09-19T04:30:00.000Z',
-      '2018-09-19T05:30:00.000Z',
-      '2018-09-19T06:30:00.000Z',
-    ],
-  },
-
-};
-const defaultChartDatas = {
-  series: [
-    // {
-    //   name: 'series1',
-    //   data: [31, 40, 28, 51, 42, 109, 100],
-    // },
-    {
-      name: 'series2',
-      data: [11, 32, 45, 32, 34, 52, 41],
-    },
-  ],
-  xaxis: {
-    type: 'datetime',
-    categories: [
-      '2018-09-19T00:00:00.000Z',
-      '2018-09-19T01:30:00.000Z',
-      '2018-09-19T02:30:00.000Z',
-      '2018-09-19T03:30:00.000Z',
-      '2018-09-19T04:30:00.000Z',
-      '2018-09-19T05:30:00.000Z',
-      '2018-09-19T06:30:00.000Z',
-    ],
-  },
-};
-
 export default function Home() {
   const { toggleSidebar } = useSidebar()
-  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange } = useFilter()
+  const { 
+    selectedFilter, 
+    setSelectedFilter, 
+    insightsData, 
+    setInsightsData, 
+    dateRange, 
+    setDateRange, 
+    tableData,
+    setTableData } = useFilter()
 
   const [filterOptions, setFilterOptions] = useState([])
-  const [chartData, setChartData] = useState(defaultChartData);
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
   const [metrics, setMetrics] = useState(defaultMetrics);
   const [isLoading, setIsLoading] = useState(false)
+  const [chartData, setChartData] = useState({
+  series: [],
+  categories: [],
+});
   const dashboardRef = useRef(null)
-
 
   useEffect(() => {
     // Load ionicons
@@ -117,7 +75,7 @@ export default function Home() {
     const loadPageData = async () => {
     if (!selectedFilter) return;
 
-    if(insightsData[0]) {
+    if(Array.isArray(insightsData) && insightsData[0]) {
       console.log('Using existing global insights data:', insightsData);
 
       const updatedMetrics = {
@@ -127,10 +85,36 @@ export default function Home() {
           totalSpend: insightsData[0].find((i) => i.name === 'total_spend')?.value || 0,
         };
 
-        setMetrics(updatedMetrics);
+        setMetrics(updatedMetrics); 
+        const processedTableData = insightsData[1].reduce((acc, metric) => {
+        metric.values.forEach((value) => {
+          const normalizedDate = new Date(value.end_time).toLocaleDateString();
+          const existingRow = acc.find((row) => row.date === normalizedDate);
+
+          if (existingRow) {
+            if (metric.name === 'page_impressions_unique') {
+              existingRow.reach += value.value;
+            } else if (metric.name === 'page_media_view') {
+              existingRow.views += value.value;
+            } else if (metric.name === 'page_post_engagements') {
+              existingRow.engagement += value.value;
+            }
+          } else {
+            acc.push({
+              date: normalizedDate,
+              reach: metric.name === 'page_impressions_unique' ? value.value : 0,
+              views: metric.name === 'page_media_view' ? value.value : 0,
+              engagement: metric.name === 'page_post_engagements' ? value.value : 0,
+              spend: 0, // Add spend if available
+              });
+            }
+          });
+          return acc;
+        }, []);
+
+        setTableData(processedTableData);
         return;
     }
-
     try {
       setIsLoading(true);
       const responseData = await get_page_insights(selectedFilter.id, dateRange.since, dateRange.until); // Call without date range
@@ -154,13 +138,38 @@ export default function Home() {
     }
   }
     loadPageData();
-  }, [selectedFilter, dateRange, insightsData]);
+  }, [selectedFilter, insightsData, dateRange]);
+
+//useEffect to process chart data whenever tableData changes 
+  useEffect(() => {
+  const processChartData = () => {
+    if (!tableData || tableData.length === 0) return;
+
+    const categories = tableData.map((row) => row.date); // Dates for the x-axis
+    const reachData = tableData.map((row) => row.reach); // Reach values
+    const engagementData = tableData.map((row) => row.engagement); // Engagement values
+    const viewsData = tableData.map((row) => row.views); // Views values
+    const spendData = tableData.map((row) => row.spend); // Spend values
+
+    setChartData({
+      series: [
+        { name: 'Reach', data: reachData },
+        { name: 'Engagement', data: engagementData },
+        { name: 'Views', data: viewsData },
+        { name: 'Spend', data: spendData },
+      ],
+      categories,
+    });
+  };
+
+  processChartData();
+}, [tableData]);
  
 
   const handleDateRangeChange = async (range) => {
     console.log('Date range changed:', range);
     setDateRange(range);
-    setInsightsData(null); // Clear existing insights data on date range change
+    setInsightsData([]); // Clear existing insights data on date range change
   };
 
   const handleFilterSelect = async (filterId) => {
@@ -295,7 +304,16 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Total Reach Vrs Total Engagement</h2>
               <div className="mt-4">
                 {/* Use dynamic chartData */}
-                <ApexChart options={chartData} series={chartData.series} type="bar" height={385} colors={chartData.color}   />
+                <ApexChart options={{
+                    chart: { id: 'reach-vs-engagement' },
+                    xaxis: { categories: chartData.categories },
+                  }}
+                  series={[
+                    { name: 'Reach', data: chartData.series[0]?.data || [] },
+                    { name: 'Engagement', data: chartData.series[1]?.data || [] },
+                  ]}
+                  type="bar" height={385} 
+                  colors={chartData.color}   />
               </div>
             </div>
           </div>
@@ -304,7 +322,14 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Total Reach</h2>
               <div className="mt-4">
                 {/* Use dynamic chartData */}
-                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="area" height={385} />
+                <ApexChart
+                    options={{
+                      chart: { id: 'reach-vs-engagement' },
+                      xaxis: { categories: chartData.categories },
+                    }}
+                    series={[
+                      { name: 'Reach', data: chartData.series[0]?.data || [] }
+                    ]} type="line" height={385} width={100} />
               </div>
             </div>
           </div>
@@ -313,7 +338,14 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Total Engagement </h2>
               <div className="mt-4">
                 {/* Use dynamic chartData */}
-                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="area" height={385} />
+                <ApexChart options={{
+                      chart: { id: 'reach-vs-engagement' },
+                      xaxis: { categories: chartData.categories },
+                    }}
+                    series={[
+                      { name: 'Views', data: chartData.series[2]?.data || [] }
+                    ]} type="area" height={385} width={100} 
+                />
               </div>
             </div>
           </div>
@@ -322,7 +354,7 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4">Total Spend</h2>
               <div className="mt-4">
                 {/* Use dynamic chartData, overriding type to line */}
-                <ApexChart options={defaultChartDatas} series={defaultChartDatas.series} type="line" height={385} />
+                <ApexChart options={chartData} series={chartData.series} type="line" height={385} />
               </div>
             </div>
           </div>
@@ -350,8 +382,8 @@ export default function Home() {
       <h2 className="text-xl font-semibold mb-4 shrink-0">Total Reach</h2>
       <div className="flex-1 min-h-0">
         <ApexChart 
-            options={defaultChartDatas} 
-            series={defaultChartDatas.series} 
+            options={chartData} 
+            series={chartData.series} 
             type="area" 
             height="100%" 
         />
@@ -359,35 +391,6 @@ export default function Home() {
     </div>
   </div>
 
-  {/* Chart 3 */}
-  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
-    <div className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Engagement</h2>
-      <div className="flex-1 min-h-0">
-        <ApexChart 
-            options={defaultChartDatas} 
-            series={defaultChartDatas.series} 
-            type="area" 
-            height="100%" 
-        />
-      </div>
-    </div>
-  </div>
-
-  {/* Chart 4 */}
-  <div className="bg-white h-[50vh] p-5 rounded-2xl shadow-sm transition-all hover:shadow-md flex flex-col">
-    <div className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold mb-4 shrink-0">Total Spend</h2>
-      <div className="flex-1 min-h-0">
-        <ApexChart 
-            options={defaultChartDatas} 
-            series={defaultChartDatas.series} 
-            type="line" 
-            height="100%" 
-        />
-      </div>
-    </div>
-  </div>
 </div>
 </div>
     </div>
