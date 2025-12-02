@@ -16,22 +16,13 @@ const defaultTableData = [
 
 export default function Overview() {
   const { toggleSidebar } = useSidebar()
-  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData } = useFilter()
+  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange } = useFilter()
 
   const [filterOptions, setFilterOptions] = useState([])
   const [tableData, setTableData] = useState(defaultTableData)
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
-  const [dateRange, setDateRange] = useState(() => {
-  const today = new Date();
-  const last30Days = new Date();
-  last30Days.setDate(today.getDate() - 30);
 
-  return {
-    since: last30Days.toISOString().split('T')[0], // Format as YYYY-MM-DD
-    until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
-  };
-});
-  
+
   useEffect(() => {
     const fetchPages = async () => {
       try {
@@ -119,7 +110,8 @@ useEffect(() => {
 
   const handleDateRangeChange = (range) => {
     console.log('Date range changed:', range)
-    // TODO: Fetch table data for the selected date range
+    setDateRange(range);
+    setInsightsData(null); // Clear previous insights data
   }
 
   const handleFilterSelect = async (filterId) => {
