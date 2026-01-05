@@ -16,10 +16,9 @@ const defaultTableData = [
 
 export default function Overview() {
   const { toggleSidebar } = useSidebar()
-  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange } = useFilter()
+  const { selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange, tableData, setTableData } = useFilter()
 
   const [filterOptions, setFilterOptions] = useState([])
-  const [tableData, setTableData] = useState(defaultTableData)
   const [selectedPlatform, setSelectedPlatform] = useState(platformOptions[0])
 
 
@@ -54,7 +53,7 @@ useEffect(() => {
         console.log('Using global insights data:', rawData);
       }
       
-      if (!rawData) {
+      if (!Array.isArray(insightsData) && !rawData) {
         console.log('Global insights data not available. Fetching from backend...');
         const responseData = await get_page_insights(selectedFilter.id, dateRange.since, dateRange.until); // Fetch from backend
         if (responseData) {

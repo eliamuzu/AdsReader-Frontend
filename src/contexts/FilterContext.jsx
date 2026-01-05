@@ -15,9 +15,10 @@ export function FilterProvider({ children }) {
         until: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
       }; 
   });
+  const [tableData, setTableData] = useState([]);
 
   return (
-    <FilterContext.Provider value={{ selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange }}>
+    <FilterContext.Provider value={{ selectedFilter, setSelectedFilter, insightsData, setInsightsData, dateRange, setDateRange, tableData, setTableData }}>
       {children}
     </FilterContext.Provider>
   );
